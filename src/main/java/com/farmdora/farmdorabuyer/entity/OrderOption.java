@@ -35,9 +35,7 @@ public class OrderOption {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(nullable = false)
     private Integer quantity;
 
-    @Column(nullable = false)
     private Integer price;
 }
