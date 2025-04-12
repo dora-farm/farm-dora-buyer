@@ -23,7 +23,7 @@ public class OrderResponseDTO {
 
     private Integer amount; // 결제 가격
 
-    private List<OptionInfoDTO> optionInfoDTO;
+    private List<OptionInfoDTO> options;
 
     @Getter
     @Setter

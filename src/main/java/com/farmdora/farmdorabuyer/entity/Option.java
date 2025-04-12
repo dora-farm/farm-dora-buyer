@@ -21,7 +21,7 @@ public class Option {
     @Column(name = "option_id")
     private Integer id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id")
     private OptionType type;
 

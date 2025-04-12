@@ -109,7 +109,7 @@ public class OrderService {
                                 .createdDate(order.getCreatedDate())
                                 .statusId(order.getStatus().getId())
                                 .title(sale.getTitle())
-                                .optionInfoDTO(optionInfos)
+                                .options(optionInfos)
                                 .build();
 
                         // Payment 정보 설정
