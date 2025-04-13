@@ -6,6 +6,7 @@ import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO.*;
 import com.farmdora.farmdorabuyer.orders.dto.OrderSearchDTO;
 import com.farmdora.farmdorabuyer.orders.repository.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -26,14 +28,6 @@ public class OrderService {
     private final PayRepository payRepository;
     private final SaleFileRepository saleFileRepository;
     private final ReviewRepositry reviewRepositry;
-
-    public OrderService(OrderRepository orderRepository, OrderOptionRepository orderOptionRepository, PayRepository payRepository, SaleFileRepository saleFileRepository, ReviewRepositry reviewRepositry) {
-        this.orderRepository = orderRepository;
-        this.orderOptionRepository = orderOptionRepository;
-        this.payRepository = payRepository;
-        this.saleFileRepository = saleFileRepository;
-        this.reviewRepositry = reviewRepositry;
-    }
 
     @Transactional(readOnly = true)
     public PageResponseDTO<OrderResponseDTO> getOrderList(Integer userId, OrderSearchDTO orderSearchDTO, Pageable pageable) {
