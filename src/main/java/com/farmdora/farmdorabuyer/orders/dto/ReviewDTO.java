@@ -14,7 +14,7 @@ public class ReviewDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ReviewRequest {
-        private Integer orderId;
+        private Integer saleId;
         private byte score;
         private String content;
     }
@@ -26,7 +26,7 @@ public class ReviewDTO {
     @NoArgsConstructor
     public static class ReviewResponse {
         private Integer reviewId;
-        private Integer orderId;
+        private Integer saleId;
         private String content;
         private byte score;
         private LocalDateTime createdDate;

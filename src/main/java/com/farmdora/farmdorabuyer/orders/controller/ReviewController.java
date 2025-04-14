@@ -26,23 +26,16 @@ public class ReviewController {
 
     @PostMapping("/order/review")
     public ResponseEntity<?> createReview(
-            @RequestParam("orderId") Integer orderId,
-            @RequestParam("content") String content,
-            @RequestParam("score") Byte score,
+            ReviewRequest request,
             @RequestParam(value = "images", required = false) MultipartFile[] images) {
 
         try {
-            ReviewRequest request = new ReviewRequest();
-            request.setOrderId(orderId);
-            request.setContent(content);
-            request.setScore(score);
-
             List<MultipartFile> imagesList = images != null ? Arrays.asList(images) : new ArrayList<>();
-            ReviewResponse response = reviewService.createReview(request, imagesList);
+            reviewService.createReview(1, request, imagesList);
 
             return ResponseEntity
                     .ok()
-                    .body(new HttpResponse(HttpStatus.OK, REGISTER_REVIEW_SUCCESS.getMessage() ,response));
+                    .body(new HttpResponse(HttpStatus.OK, REGISTER_REVIEW_SUCCESS.getMessage(), null));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity

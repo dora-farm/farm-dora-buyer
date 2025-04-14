@@ -1,12 +1,9 @@
 package com.farmdora.farmdorabuyer.orders.service;
 
-import com.farmdora.farmdorabuyer.entity.Order;
-import com.farmdora.farmdorabuyer.entity.Review;
-import com.farmdora.farmdorabuyer.entity.ReviewFile;
+import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.dto.ReviewDTO.*;
-import com.farmdora.farmdorabuyer.orders.repository.OrderRepository;
-import com.farmdora.farmdorabuyer.orders.repository.ReviewFileRepository;
-import com.farmdora.farmdorabuyer.orders.repository.ReviewRepositry;
+import com.farmdora.farmdorabuyer.orders.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,34 +16,36 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
 
     private final ReviewRepositry reviewRepositry;
     private final ReviewFileRepository reviewFileRepository;
     private final OrderRepository orderRepository;
+    private final SaleRepository saleRepository;
+    private final UserRepository userRepository;
+
     private final String uploadDir = System.getProperty("user.dir") + "/upload/reviews/";
 
-    public ReviewService(ReviewRepositry reviewRepositry, ReviewFileRepository reviewFileRepository, OrderRepository orderRepository) {
-        this.reviewRepositry = reviewRepositry;
-        this.reviewFileRepository = reviewFileRepository;
-        this.orderRepository = orderRepository;
-    }
-
     @Transactional
-    public ReviewResponse createReview(ReviewRequest request, List<MultipartFile> files) throws IOException {
-        Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
+    public void createReview(Integer userId, ReviewRequest request, List<MultipartFile> files) throws IOException {
 
-        // 리뷰 생성 및 저장
+        Sale sale = saleRepository.findById(request.getSaleId())
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+        // User 조회 추가
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 리뷰 생성 및 저장 - user 필드 추가
         Review review = Review.builder()
-                .order(order)
+                .user(user)    // User 객체 설정
+                .sale(sale)
                 .score(request.getScore())
                 .content(request.getContent())
                 .build();
 
         Review savedReview = reviewRepositry.save(review);
-
-        List<String> imageUrls = new ArrayList<>();
 
         if(files != null && !files.isEmpty()) {
             for(MultipartFile file: files) {
@@ -78,8 +77,6 @@ public class ReviewService {
                                 .build();
 
                         reviewFileRepository.save(reviewFile);
-
-                        imageUrls.add("/images/reviews/" + savedFilename);
                     } catch (Exception e) {
                         // 로깅 추가 권장
                         System.err.println("파일 업로드 중 오류 발생: " + e.getMessage());
@@ -87,14 +84,5 @@ public class ReviewService {
                 }
             }
         }
-
-        return ReviewResponse.builder()
-                .reviewId(savedReview.getId())  // 오타 수정
-                .orderId(savedReview.getOrder().getId())
-                .content(savedReview.getContent())
-                .score(savedReview.getScore())
-                .createdDate(savedReview.getCreatedDate())  // LocalDateTime을 String으로 변환
-                .imageUrls(imageUrls)
-                .build();
     }
 }

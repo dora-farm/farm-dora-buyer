@@ -10,8 +10,11 @@ import java.util.Set;
 
 public interface ReviewRepositry extends JpaRepository<Review, Integer> {
 
-    @Query("SELECT r.order.id FROM Review r WHERE r.order.id IN :orderIds")
-    Set<Integer> findOrderIdsWithReviews(@Param("orderIds")List<Integer> orderIds);
+//    @Query("SELECT r.sale.id FROM Review r WHERE r.user.id IN :userId")
+//    Set<Integer> findOrderIdsWithReviews(@Param("userId")List<Integer> userId);
 
-    boolean existsByOrderId(Integer orderId);
+    @Query("SELECT r.sale.id FROM Review r WHERE r.user.userId = :userId")
+    Set<Integer> findSaleIdsWithReviewsByUserId(@Param("userId") Integer userId);
+
+//    boolean existsByOrderId(Integer orderId);
 }
