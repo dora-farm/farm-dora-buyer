@@ -31,12 +31,9 @@ public class SaleFile {
     @JoinColumn(name = "sale_id")
     private Sale sale;
 
-    @Column(nullable = false)
     private String saveFile;
 
-    @Column(nullable = false)
     private String originFile;
 
-    @Column(nullable = false)
     private boolean isMain;
 }

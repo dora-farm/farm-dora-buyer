@@ -21,6 +21,6 @@ public class OrderStatus {
     @Column(name = "status_id")
     private Short id;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50)
     private String name;
 }

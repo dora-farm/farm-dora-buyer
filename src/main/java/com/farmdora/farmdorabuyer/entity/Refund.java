@@ -29,13 +29,13 @@ public class Refund extends BaseTimeEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "order_id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "type_id")
+    @JoinColumn(name = "type_id")
     private RefundType type;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String content;
 }
