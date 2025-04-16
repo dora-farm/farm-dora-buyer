@@ -14,6 +14,7 @@ public class ReviewDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ReviewRequest {
+        private Integer orderId;
         private Integer saleId;
         private byte score;
         private String content;

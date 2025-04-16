@@ -4,6 +4,7 @@ package com.farmdora.farmdorabuyer.orders.repository;
 import com.farmdora.farmdorabuyer.config.AuditConfig;
 import com.farmdora.farmdorabuyer.entity.Order;
 import com.farmdora.farmdorabuyer.entity.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +28,11 @@ class OrderRepositoryTest {
     @Autowired
     private OrderRepository orderRepository;
 
-    @Test
-    @DisplayName("사용자의 기간에 관한 데이터 조회")
-    public void whenFindAllByUserUserIdAndCreatedDateBetween_withNoOrders_thenReturnEmptyList() {
-        //given
-        User user = User.builder()
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        user = User.builder()
                 .build();
         testEntityManager.persist(user);
 
@@ -40,14 +41,16 @@ class OrderRepositoryTest {
                 .build();
         testEntityManager.persist(order);
 
+        testEntityManager.flush();
+    }
+
+    @Test
+    @DisplayName("사용자의 기간에 관한 데이터 조회")
+    public void whenFindAllByUserUserIdAndCreatedDateBetween_withNoOrders_thenReturnEmptyList() {
+        //given
+        Pageable pageable = PageRequest.of(0, 10);
         LocalDateTime now = LocalDateTime.now().minusDays(1);
         LocalDateTime tomorrow = now.plusDays(1);
-
-        testEntityManager.flush();
-
-        System.out.println("order: " + order.getCreatedDate());
-
-        Pageable pageable = PageRequest.of(0, 10);
 
         //when
         Page<Order> orders = orderRepository.findAllByUserUserIdAndCreatedDateBetweenOrderByCreatedDateDesc(
