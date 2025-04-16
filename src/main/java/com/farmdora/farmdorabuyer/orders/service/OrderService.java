@@ -67,7 +67,7 @@ public class OrderService {
                 .collect(Collectors.toMap(file -> file.getSale().getId(), file -> file));
 
         // 리뷰가 작성된 주문 ID 목록 조회
-        Set<Integer> reviewSalesIds = reviewRepositry.findSaleIdsWithReviewsByUserId(userId);
+        Set<Integer> reviewSalesIds = reviewRepositry.findSaleIdsWithReviewsBySaleIds(saleIds);
 
         // 가공된 데이터 담는 최종 리턴 List
         List<OrderResponseDTO> orderResponseDTOList = new ArrayList<>();
@@ -110,7 +110,7 @@ public class OrderService {
                             OptionInfoDTO optionDto = OptionInfoDTO.builder()
                                     .name(opt.getName())
                                     .quantity(orderOption.getQuantity())
-                                    .price(orderOption.getQuantity() * orderOption.getPrice())
+                                    .price(orderOption.getPrice())
                                     .build();
                             optionInfos.add(optionDto);
                         }
