@@ -5,10 +5,8 @@ import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO.*;
 import com.farmdora.farmdorabuyer.orders.dto.OrderSearchDTO;
-import com.farmdora.farmdorabuyer.orders.repository.OrderOptionRepository;
-import com.farmdora.farmdorabuyer.orders.repository.OrderRepository;
-import com.farmdora.farmdorabuyer.orders.repository.PayRepository;
-import com.farmdora.farmdorabuyer.orders.repository.SaleFileRepository;
+import com.farmdora.farmdorabuyer.orders.repository.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,23 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderOptionRepository orderOptionRepository;
     private final PayRepository payRepository;
     private final SaleFileRepository saleFileRepository;
-
-    public OrderService(OrderRepository orderRepository, OrderOptionRepository orderOptionRepository, PayRepository payRepository, SaleFileRepository saleFileRepository) {
-        this.orderRepository = orderRepository;
-        this.orderOptionRepository = orderOptionRepository;
-        this.payRepository = payRepository;
-        this.saleFileRepository = saleFileRepository;
-    }
+    private final ReviewRepositry reviewRepositry;
 
     @Transactional(readOnly = true)
     public PageResponseDTO<OrderResponseDTO> getOrderList(Integer userId, OrderSearchDTO orderSearchDTO, Pageable pageable) {
@@ -60,7 +54,7 @@ public class OrderService {
         Map<Integer, Pay> payMap = payments.stream()
                 .collect(Collectors.toMap(pay -> pay.getOrder().getId(), pay -> pay));
 
-        // 옵션에서 is_main이 true인 saleId값 추출
+        // 옵션에서 saleId값 추출
         List<Integer> saleIds = orderOptions.stream()
                 .map(orderOption -> orderOption.getOption().getSale().getId())
                 .distinct() // 중복 제거
@@ -72,6 +66,9 @@ public class OrderService {
         Map<Integer, SaleFile> saleFileMap = mainFiles.stream()
                 .collect(Collectors.toMap(file -> file.getSale().getId(), file -> file));
 
+        // 리뷰가 작성된 주문 ID 목록 조회
+        Set<Integer> reviewSalesIds = reviewRepositry.findSaleIdsWithReviewsBySaleIds(saleIds);
+
         // 가공된 데이터 담는 최종 리턴 List
         List<OrderResponseDTO> orderResponseDTOList = new ArrayList<>();
 
@@ -79,53 +76,66 @@ public class OrderService {
             List<OrderOption> optionsForOrder = orderOptionMap.get(order.getId());
 
             if (optionsForOrder != null && !optionsForOrder.isEmpty()) {
-                // 첫 번째 옵션을 통해 Sale 정보를 가져옴
-                OrderOption firstOption = optionsForOrder.get(0);
+                // 주문 정보 기본 세팅
+                OrderResponseDTO responseDTO = OrderResponseDTO.builder()
+                        .orderId(order.getId())
+                        .createdDate(order.getCreatedDate())
+                        .build();
 
-                // LAZY 로딩 객체에 안전하게 접근
-                Option option = firstOption.getOption();
+                // Payment 정보 설정
+                Pay payment = payMap.get(order.getId());
+                if (payment != null) {
+                    responseDTO.setAmount(payment.getAmount());
+                }
 
-                if (option != null) {
-                    Sale sale = option.getSale();
-                    if (sale != null) {
+                // Sale별로 옵션을 그룹화
+                Map<Integer, List<OrderOption>> optionsBySale = optionsForOrder.stream()
+                        .collect(Collectors.groupingBy(opt -> opt.getOption().getSale().getId()));
 
-                        // OptionInfoDTO 생성
+                // Sale별로 정보 생성
+                List<SaleInfoDTO> salesList = new ArrayList<>();
+
+                for (Map.Entry<Integer, List<OrderOption>> entry : optionsBySale.entrySet()) {
+                    Integer saleId = entry.getKey();
+                    List<OrderOption> saleOptions = entry.getValue();
+
+                    if (!saleOptions.isEmpty()) {
+                        // 첫 번째 옵션을 통해 Sale 정보를 가져옴
+                        Sale sale = saleOptions.get(0).getOption().getSale();
+
+                        // 옵션 정보 생성
                         List<OptionInfoDTO> optionInfos = new ArrayList<>();
-
-                        for(OrderOption orderOption : optionsForOrder) {
+                        for (OrderOption orderOption : saleOptions) {
                             Option opt = orderOption.getOption();
-                            if(opt != null) {
-                                OrderResponseDTO.OptionInfoDTO dto = OrderResponseDTO.OptionInfoDTO.builder()
-                                        .name(opt.getName())
-                                        .quantity(orderOption.getQuantity())
-                                        .build();
-                                optionInfos.add(dto);
-                            }
+                            OptionInfoDTO optionDto = OptionInfoDTO.builder()
+                                    .name(opt.getName())
+                                    .quantity(orderOption.getQuantity())
+                                    .price(orderOption.getPrice())
+                                    .build();
+                            optionInfos.add(optionDto);
                         }
 
-                        // OrderResponseDTO 생성
-                        OrderResponseDTO responseDTO = OrderResponseDTO.builder()
-                                .orderId(order.getId())
-                                .createdDate(order.getCreatedDate())
-                                .statusId(order.getStatus().getId())
+                        // Sale 정보 생성
+                        SaleInfoDTO saleInfo = SaleInfoDTO.builder()
+                                .saleId(saleId)
                                 .title(sale.getTitle())
+                                .statusId(order.getStatus().getId())
+                                .reviewCompleted(reviewSalesIds.contains(saleId))
                                 .options(optionInfos)
                                 .build();
 
-                        // Payment 정보 설정
-                        Pay payment = payMap.get(order.getId());
-                        if (payment != null) {
-                            responseDTO.setAmount(payment.getAmount()); // 주문ID에 해당하는 총 결제 금액
+                        // 이미지 정보 설정
+                        SaleFile saleFile = saleFileMap.get(saleId);
+                        if (saleFile != null) {
+                            saleInfo.setSaveFile(saleFile.getSaveFile());
                         }
 
-                        SaleFile saleFile = saleFileMap.get(sale.getId());
-                        if(saleFile != null) {
-                            responseDTO.setSaveFile(saleFile.getSaveFile());
-                        }
-
-                        orderResponseDTOList.add(responseDTO);
+                        salesList.add(saleInfo);
                     }
                 }
+
+                responseDTO.setSales(salesList);
+                orderResponseDTOList.add(responseDTO);
             }
         }
         return new PageResponseDTO<>(orders, orderResponseDTOList);

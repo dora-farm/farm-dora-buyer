@@ -1,0 +1,15 @@
+package com.farmdora.farmdorabuyer.common.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum SuccessMessage {
+    SEARCH_ORDER_SUCCESS("주문 목록 조회에 성공하였습니다."),
+    SEARCH_ORDER_PAY_SUCCESS("주문 결제 정보 조회에 성공하였습니다."),
+    REGISTER_REVIEW_SUCCESS("리뷰 등록에 성공하였습니다.");
+
+
+    private final String message;
+}
