@@ -2,8 +2,6 @@ package com.farmdora.farmdorabuyer.orders.controller;
 
 import com.farmdora.farmdorabuyer.common.response.HttpResponse;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
-import com.farmdora.farmdorabuyer.common.response.ResponseDTO;
-import com.farmdora.farmdorabuyer.orders.dto.ReviewDTO;
 import com.farmdora.farmdorabuyer.orders.dto.ReviewDTO.*;
 import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.service.ReviewService;
@@ -12,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
