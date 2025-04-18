@@ -18,7 +18,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class OptionType {
+public class SaleType {
 
     @Id
     @Column(name = "type_id")
@@ -26,7 +26,7 @@ public class OptionType {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "type_big_id")
-    private OptionTypeBig optionTypeBig;
+    private SaleTypeBig saleTypeBig;
 
     @Column(nullable = false, length = 50)
     private String name;
