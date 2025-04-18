@@ -7,5 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
-    Page<Order> findAllByUserUserIdAndCreatedDateBetweenOrderByCreatedDateDesc(Integer userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Order> findAllByUserUserIdAndCreatedDateBetweenOrderByCreatedDateDesc(
+            Integer userId,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable);
 }

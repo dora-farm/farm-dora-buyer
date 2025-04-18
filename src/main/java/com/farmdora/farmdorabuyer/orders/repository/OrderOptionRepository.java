@@ -13,4 +13,6 @@ public interface OrderOptionRepository extends JpaRepository<OrderOption, Intege
 
     // 주문별 주문 옵션 목록 조회
     List<OrderOption> findByOrder(Order order);
+
+    List<OrderOption> findByOrderId(Integer orderId);
 }

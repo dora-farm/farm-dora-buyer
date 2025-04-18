@@ -4,7 +4,7 @@ import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
 import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO.*;
-import com.farmdora.farmdorabuyer.orders.dto.OrderSearchDTO;
+import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,13 +28,13 @@ public class OrderService {
     private final ReviewRepositry reviewRepositry;
 
     @Transactional(readOnly = true)
-    public PageResponseDTO<OrderResponseDTO> getOrderList(Integer userId, OrderSearchDTO orderSearchDTO, Pageable pageable) {
+    public PageResponseDTO<OrderResponseDTO> getOrderList(Integer userId, SearchDTO SearchDTO, Pageable pageable) {
         // 날짜에 맞는 사용자의 주문 리스트 내림차순
         Page<Order> orders = orderRepository.
                 findAllByUserUserIdAndCreatedDateBetweenOrderByCreatedDateDesc(
                         userId,
-                        orderSearchDTO.getStartDate(),
-                        orderSearchDTO.getEndDate(),
+                        SearchDTO.getStartDate(),
+                        SearchDTO.getEndDate(),
                         pageable
                 );
 
@@ -66,9 +64,9 @@ public class OrderService {
         Map<Integer, SaleFile> saleFileMap = mainFiles.stream()
                 .collect(Collectors.toMap(file -> file.getSale().getId(), file -> file));
 
-        // 리뷰가 작성된 주문 ID 목록 조회
-        Set<Integer> reviewSalesIds = reviewRepositry.findSaleIdsWithReviewsBySaleIds(saleIds);
-
+        // 수정: 주문ID와 판매ID의 조합으로 리뷰 작성 여부를 확인하기 위한 Set 생성
+//        Set<String> reviewOrderSaleCombinations = reviewRepositry.findOrderSaleCombinationsWithReviews(orders.getContent(), saleIds);
+//        log.info("reviewOrderSaleCombinations : " + reviewOrderSaleCombinations);
         // 가공된 데이터 담는 최종 리턴 List
         List<OrderResponseDTO> orderResponseDTOList = new ArrayList<>();
 
@@ -115,12 +113,15 @@ public class OrderService {
                             optionInfos.add(optionDto);
                         }
 
+                        // 수정: 특정 주문-상품 조합에 대한 리뷰 작성 여부 확인
+                        String orderSaleKey = order.getId() + "_" + saleId;
+                        boolean hasReview = reviewRepositry.existsByOrderAndSale(order, sale);
                         // Sale 정보 생성
                         SaleInfoDTO saleInfo = SaleInfoDTO.builder()
                                 .saleId(saleId)
                                 .title(sale.getTitle())
                                 .statusId(order.getStatus().getId())
-                                .reviewCompleted(reviewSalesIds.contains(saleId))
+                                .reviewCompleted(hasReview) // 수정된 부분
                                 .options(optionInfos)
                                 .build();
 
