@@ -52,33 +52,10 @@ public class ReviewController {
 
         Integer userId = 1;
 
-        log.info("검색 조건: startDate={}, endDate={}",
-                searchDTO.getStartDate(), searchDTO.getEndDate());
-
         PageResponseDTO<ReviewResponse> pageResponse = reviewService.getMyReviews(userId, searchDTO, pageable);
 
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 조회했습니다.", pageResponse));
     }
 
-    @PutMapping(value = "/order/myreviews/{reviewId}")
-    public ResponseEntity<?> updateMyReviews(
-            @PathVariable("reviewId") Integer reviewId,
-            @RequestParam("score") byte score,
-            @RequestParam("content") String content,
-            @RequestParam(value = "removedImageUrls", required = false) String[] removedImageUrls,
-            @RequestParam(value = "images", required = false) MultipartFile[] newImages) throws IOException {
-
-            List<String> removedImageList = removedImageUrls != null ? Arrays.asList(removedImageUrls) : new ArrayList<>();
-
-            ReviewResponse updatedReview = reviewService.updateReview(
-                    reviewId,
-                    score,
-                    content,
-                    removedImageList,
-                    newImages
-            );
-            return ResponseEntity.ok()
-                    .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 수정했습니다.", updatedReview));
-    }
 }
