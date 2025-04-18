@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderSearchDTO {
+public class SearchDTO {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;

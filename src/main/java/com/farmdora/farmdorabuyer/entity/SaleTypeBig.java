@@ -15,7 +15,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class OptionTypeBig {
+public class SaleTypeBig {
 
     @Id
     @Column(name = "type_big_id")

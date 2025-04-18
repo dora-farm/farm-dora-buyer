@@ -31,6 +31,10 @@ public class Sale extends BaseTimeEntity {
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
+    private SaleType type;
+
     @Column(length = 50)
     private String title;
 

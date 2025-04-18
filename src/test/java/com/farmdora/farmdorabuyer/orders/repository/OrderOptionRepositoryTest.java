@@ -2,6 +2,7 @@ package com.farmdora.farmdorabuyer.orders.repository;
 
 import com.farmdora.farmdorabuyer.config.AuditConfig;
 import com.farmdora.farmdorabuyer.entity.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,16 @@ class OrderOptionRepositoryTest {
     @Autowired
     private OrderOptionRepository orderOptionRepository;
 
-    @Test
-    @DisplayName("주문한 상품의 옵션 조회")
-    public void selectOption() {
-        // given
+    private Order order;
+    LocalDateTime orderTime = order.getCreatedDate();
+
+    private Pay pay;
+    private PayStatus payStatus;
+    private OrderStatus orderStatus;
+    private SaleFile saleFile;
+
+    @BeforeEach
+    void setUp() {
         User user = User.builder()
                 .build();
         testEntityManager.persist(user);
@@ -42,7 +49,6 @@ class OrderOptionRepositoryTest {
                 .status(orderStatus)
                 .build();
         testEntityManager.persist(order);
-        LocalDateTime orderTime = order.getCreatedDate();
 
         Sale sale = Sale.builder()
                 .title("제주 삼다수")
@@ -98,19 +104,17 @@ class OrderOptionRepositoryTest {
         testEntityManager.persist(pay);
 
         testEntityManager.flush();
+    }
 
-        System.out.println("상품 제목 : " + sale.getTitle());
-        System.out.println("주문 시간 : " + order.getCreatedDate());
-        System.out.println("상품 옵션 1 : " + option1.getName() + "개 " + orderOption1.getQuantity() + " " + orderOption1.getPrice() + "원");
-        System.out.println("상품 옵션 2 : " + option2.getName() + "개 " + orderOption2.getQuantity() + " " + orderOption2.getPrice() + "원");
-        System.out.println("총 결제금액 : " + pay.getAmount() + "원 결제");
-        System.out.println("결제 상태 : " + payStatus.getId());
-        System.out.println("배송 상태 : " + orderStatus.getId());
-        System.out.println("메인 사진 : " + saleFile.getSaveFile());
+    @Test
+    @DisplayName("주문한 상품의 옵션 조회")
+    public void selectOption() {
+        // given
+        List<Order> orders = List.of(order);
 
         // when
         // List<Order>를 전달하도록 수정
-        List<OrderOption> orderOptions = orderOptionRepository.findAllByOrderIn(List.of(order));
+        List<OrderOption> orderOptions = orderOptionRepository.findAllByOrderIn(orders);
 
         //then
         assertThat(orderOptions).hasSize(2);
