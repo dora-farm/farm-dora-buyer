@@ -10,11 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.CANCEL_ORDER_SUCCESS;
 import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.SEARCH_ORDER_SUCCESS;
 
 @RestController
@@ -34,8 +32,20 @@ public class OrderController {
         int userId = 1;
         PageResponseDTO<OrderResponseDTO> result = orderService.getOrderList(userId, SearchDTO, pageable);
 
-        return ResponseEntity
-                .ok()
+        return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_ORDER_SUCCESS.getMessage(), result));
+    }
+
+    @PutMapping("/order/{orderId}/cancel")
+    public ResponseEntity<?> cancelOrder(@PathVariable("orderId") Integer orderId) {
+        boolean isCancelOrder = orderService.cancelOrder(orderId);
+
+        if(isCancelOrder) {
+            return ResponseEntity.ok()
+                    .body(new HttpResponse(HttpStatus.OK, CANCEL_ORDER_SUCCESS.getMessage(), null));
+        } else {
+            return ResponseEntity.badRequest()
+                    .body(new HttpResponse(HttpStatus.BAD_REQUEST, "주문 취소에 실패했습니다", null));
+        }
     }
 }

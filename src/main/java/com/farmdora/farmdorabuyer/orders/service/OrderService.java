@@ -1,5 +1,6 @@
 package com.farmdora.farmdorabuyer.orders.service;
 
+import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
 import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
@@ -24,8 +25,10 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderOptionRepository orderOptionRepository;
     private final PayRepository payRepository;
+    private final PayStatusRepository payStatusRepository;
     private final SaleFileRepository saleFileRepository;
     private final ReviewRepositry reviewRepositry;
+    private final OrderStatusRepository orderStatusRepository;
 
     @Transactional(readOnly = true)
     public PageResponseDTO<OrderResponseDTO> getOrderList(Integer userId, SearchDTO SearchDTO, Pageable pageable) {
@@ -125,5 +128,31 @@ public class OrderService {
             orderResponseList.add(responseDTO);
         }
         return new PageResponseDTO<>(orders, orderResponseList);
+    }
+
+    @Transactional
+    public boolean cancelOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("order", orderId));
+
+        if(order != null) {
+            // 주문 취소 ID
+            OrderStatus orderStatus = orderStatusRepository.findById((short) 4)
+                    .orElseThrow(() -> new ResourceNotFoundException("orderStatus", 4));
+
+            order.setStatus(orderStatus);
+            orderRepository.save(order);
+        }
+
+        Pay payment = payRepository.findByOrder(order);
+        if(payment != null) {
+            PayStatus payStatus = payStatusRepository.findById((short) 4)
+                    .orElseThrow(() -> new ResourceNotFoundException("payStatus", 4));
+
+            payment.setStatus(payStatus);
+            payRepository.save(payment);
+        }
+
+        return true;
     }
 }
