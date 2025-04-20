@@ -1,6 +1,6 @@
 package com.farmdora.farmdorabuyer.common.response;
 
-
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +14,7 @@ public class HttpResponse {
     private String message;
     private Object data;
 
+    @Builder
     public HttpResponse(HttpStatus status, String message, Object data) {
         this.status = status.value();
         this.message = message;
