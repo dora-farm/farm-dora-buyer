@@ -44,7 +44,7 @@ public class ReviewController {
                 .ok()
                 .body(new HttpResponse(HttpStatus.OK, REGISTER_REVIEW_SUCCESS.getMessage(), null));
     }
-
+  
     @GetMapping("/order/myreviews")
     public ResponseEntity<?> getMyReviews(
             @ModelAttribute SearchDTO searchDTO,
@@ -57,5 +57,5 @@ public class ReviewController {
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 조회했습니다.", pageResponse));
     }
-
+  }
 }
