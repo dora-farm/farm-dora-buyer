@@ -44,4 +44,18 @@ public class ReviewController {
                 .ok()
                 .body(new HttpResponse(HttpStatus.OK, REGISTER_REVIEW_SUCCESS.getMessage(), null));
     }
+  
+    @GetMapping("/order/myreviews")
+    public ResponseEntity<?> getMyReviews(
+            @ModelAttribute SearchDTO searchDTO,
+            @PageableDefault(size = 5) Pageable pageable) {
+
+        Integer userId = 1;
+
+        PageResponseDTO<ReviewResponse> pageResponse = reviewService.getMyReviews(userId, searchDTO, pageable);
+
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 조회했습니다.", pageResponse));
+    }
+  }
 }

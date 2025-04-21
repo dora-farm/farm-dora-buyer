@@ -1,11 +1,13 @@
 package com.farmdora.farmdorabuyer.orders.service;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -47,7 +50,6 @@ public class NcpImageService {
         this.bucketName = bucketName;
         this.cdnDomain = cdnDomain;
 
-        log.info("NCP Image Service initialized with bucket: {}", bucketName);
     }
 
     public String uploadImage(MultipartFile file) throws IOException {
@@ -94,10 +96,10 @@ public class NcpImageService {
     /**
      * 파일명을 받아 Image Optimizer URL을 생성합니다.
      */
-    public String getImageOptimizerUrl(String filename) {
-        String objectUrl = getObjectUrl(filename);
-        return generateImageOptimizerUrl(objectUrl);
-    }
+//    public String getImageOptimizerUrl(String filename) {
+//        String objectUrl = getObjectUrl(filename);
+//        return generateImageOptimizerUrl(objectUrl);
+//    }
 
     /**
      * 외부 URL을 받아 Image Optimizer URL을 생성합니다.
@@ -108,5 +110,31 @@ public class NcpImageService {
 
         // CDN URL 형식으로 구성
         return String.format("https://%s?src=\"%s\"&%s", cdnDomain, encodedUrl, defaultOptions);
+    }
+
+//    public String uploadObject(String objectName, InputStream inputStream) {
+//        try {
+//            // 객체 메타데이터 설정
+//            ObjectMetadata objectMetadata = new ObjectMetadata();
+//
+//            // 파일 업로드
+//            s3Client.putObject(bucketName, objectName, inputStream, objectMetadata);
+//
+//            // 업로드된 객체의 URL 반환
+//            return getObjectUrl(objectName);
+//        } catch (SdkClientException e) {
+//            log.error("NCP 스토리지 업로드 오류: " + e.getMessage(), e);
+//            throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.", e);
+//        }
+//    }
+
+    public boolean deleteObject(String objectName) {
+        try {
+            s3Client.deleteObject(new DeleteObjectRequest(bucketName, objectName));
+            log.info("ncp 스토리지에서 삭제 성공 : {}", objectName);
+            return true;
+        } catch (SdkClientException e) {
+            throw new RuntimeException("파일 삭제 중 오류", e);
+        }
     }
 }
