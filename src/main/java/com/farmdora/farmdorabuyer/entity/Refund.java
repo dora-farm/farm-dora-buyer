@@ -38,4 +38,7 @@ public class Refund extends BaseTimeEntity {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Column(nullable = false)
+    private boolean isProcess;
 }
