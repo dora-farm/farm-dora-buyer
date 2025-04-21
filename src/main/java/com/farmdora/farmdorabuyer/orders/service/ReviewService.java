@@ -1,5 +1,6 @@
 package com.farmdora.farmdorabuyer.orders.service;
 
+import com.farmdora.farmdorabuyer.common.exception.FileException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
 import com.farmdora.farmdorabuyer.entity.*;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,28 +53,21 @@ public class ReviewService {
 
         Review savedReview = reviewRepositry.save(review);
 
-        if(files != null && !files.isEmpty()) {
-            for(MultipartFile file: files) {
-                if(!file.isEmpty()) {
-                    try {
-                        String originalFilename = file.getOriginalFilename();
-                        if (originalFilename == null) continue;
+        for(MultipartFile file: files) {
+            try {
+                String originalFilename = file.getOriginalFilename();
+                String savedFilename  = ncpImageService.uploadImage(file);
 
-                        String savedFilename  = ncpImageService.uploadImage(file);
+                // 리뷰 파일 정보 저장
+                ReviewFile reviewFile = ReviewFile.builder()
+                        .review(savedReview)
+                        .originFile(originalFilename)
+                        .saveFile(savedFilename)
+                        .build();
 
-                        // 리뷰 파일 정보 저장
-                        ReviewFile reviewFile = ReviewFile.builder()
-                                .review(savedReview)
-                                .originFile(originalFilename)
-                                .saveFile(savedFilename) // Image Optimizer URL 저장
-                                .build();
-
-                        reviewFileRepository.save(reviewFile);
-
-                    } catch (Exception e) {
-                        throw new IOException("리뷰 이미지 업로드 실패: " + e.getMessage(), e);
-                    }
-                }
+                reviewFileRepository.save(reviewFile);
+            } catch (Exception e) {
+                throw new FileException("파일을 저장할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
     }
@@ -107,14 +102,90 @@ public class ReviewService {
                     return ReviewResponse.fromEntity(review, reviewFiles, filteredOrderOptions, ncpImageService);
                 })
                 .collect(Collectors.toList());
-        log.info("reviewResponses : " + reviewResponses);
 
-        // 생성자를 직접 사용하여 PageResponseDTO 반환
         return new PageResponseDTO<>(reviewPage, reviewResponses);
     }
 
-    private String extractFileNameFromUrl(String imageUrl) {
+    @Transactional
+    public ReviewResponse updateReview(
+            Integer reviewId,
+            byte score,
+            String content,
+            List<String> removedImageUrls,
+            MultipartFile[] newImages) throws IOException {
+
+        // todo
+        // jwt로 userId가져와야함
+        Integer userId = 1;
+
+        Review review = reviewRepositry.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
+
+        review.setScore(score);
+        review.setContent(content);
+        reviewRepositry.save(review);
+
+        if(removedImageUrls != null && !removedImageUrls.isEmpty()) {
+            for(String imageUrl : removedImageUrls) {
+                String reviewFileName = extractFilenameDeleteUrl(imageUrl);
+                ReviewFile reviewFile = reviewFileRepository.findBySaveFileAndReviewId(reviewFileName, reviewId);
+
+                ncpImageService.deleteObjectToNCP(reviewFileName);
+                reviewFileRepository.delete(reviewFile);
+            }
+        }
+
+        List<ReviewFile> NewUpdatedReviewFiles = new ArrayList<>(reviewFileRepository.findAllByReviewId(reviewId));
+        if (newImages != null) {
+            for (MultipartFile image : newImages) {
+                String UpdateFileName = ncpImageService.uploadImage(image);
+
+                ReviewFile reviewFile = ReviewFile.builder()
+                        .review(review)
+                        .originFile(image.getOriginalFilename())
+                        .saveFile(UpdateFileName)
+                        .build();
+
+                reviewFileRepository.save(reviewFile);
+                NewUpdatedReviewFiles.add(reviewFile);
+            }
+        }
+
+        List<OrderOption> orderOptions = orderOptionRepository.findByOrderId(review.getOrder().getId());
+
+        // 리뷰의 saleId와 동일한 옵션만 필터링
+        List<OrderOptionInfo> filteredOrderOptions = orderOptions.stream()
+                .filter(option -> option.getOption().getSale().getId().equals(review.getSale().getId()))
+                .map(OrderOptionInfo::fromEntity)
+                .collect(Collectors.toList());
+
+        // 응답 DTO 생성 및 반환
+        return ReviewResponse.fromEntity(review, NewUpdatedReviewFiles, filteredOrderOptions, ncpImageService);
+    }
+
+    private String extractFilenameDeleteUrl(String imageUrl) {
         return imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
     }
 
+    @Transactional
+    public void deleteReview(Integer reviewId) {
+        Integer userId = 1;
+
+        Review review = reviewRepositry.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
+
+
+        List<ReviewFile> reviewFiles = reviewFileRepository.findAllByReviewId(reviewId);
+
+        for(ReviewFile reviewFile : reviewFiles) {
+            try {
+                ncpImageService.deleteObjectToNCP(reviewFile.getSaveFile());
+                reviewFileRepository.delete(reviewFile);
+            } catch (Exception e) {
+                log.error("리뷰삭제 실패 : {}", reviewFile.getSaveFile(), e);
+            }
+        }
+
+        reviewRepositry.delete(review);
+    }
 }
