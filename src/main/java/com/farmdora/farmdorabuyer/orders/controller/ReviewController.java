@@ -75,4 +75,13 @@ public class ReviewController {
             return ResponseEntity.ok()
                     .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 수정했습니다.", updatedReview));
     }
+
+    @DeleteMapping("/order/myreviews/{reviewId}/delete")
+    public ResponseEntity<?> deleteMyReview(@PathVariable("reviewId") Integer reviewId) {
+
+        reviewService.deleteReview(reviewId);
+
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 삭제했습니다.", null));
+    }
 }

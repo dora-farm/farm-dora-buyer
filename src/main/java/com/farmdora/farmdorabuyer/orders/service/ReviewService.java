@@ -167,4 +167,25 @@ public class ReviewService {
         return imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
     }
 
+    @Transactional
+    public void deleteReview(Integer reviewId) {
+        Integer userId = 1;
+
+        Review review = reviewRepositry.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
+
+
+        List<ReviewFile> reviewFiles = reviewFileRepository.findAllByReviewId(reviewId);
+
+        for(ReviewFile reviewFile : reviewFiles) {
+            try {
+                ncpImageService.deleteObjectToNCP(reviewFile.getSaveFile());
+                reviewFileRepository.delete(reviewFile);
+            } catch (Exception e) {
+                log.error("리뷰삭제 실패 : {}", reviewFile.getSaveFile(), e);
+            }
+        }
+
+        reviewRepositry.delete(review);
+    }
 }

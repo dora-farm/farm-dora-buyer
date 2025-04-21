@@ -3,7 +3,6 @@ package com.farmdora.farmdorabuyer.orders.dto;
 import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.service.NcpImageService;
 import lombok.*;
-import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
