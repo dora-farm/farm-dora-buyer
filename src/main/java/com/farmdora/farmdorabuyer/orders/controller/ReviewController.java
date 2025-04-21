@@ -26,35 +26,29 @@ import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.REGISTER
 @RequiredArgsConstructor
 @Slf4j
 public class ReviewController {
-
     private final ReviewService reviewService;
-
+    
     @PostMapping("/order/review")
     public ResponseEntity<?> createReview(
             ReviewRequest request,
             @RequestParam(value = "images", required = false) MultipartFile[] images) throws IOException {
-
         List<MultipartFile> imagesList = images != null ? Arrays.asList(images) : new ArrayList<>();
         reviewService.createReview(1, request, imagesList);
-
         return ResponseEntity
                 .ok()
                 .body(new HttpResponse(HttpStatus.OK, REGISTER_REVIEW_SUCCESS.getMessage(), null));
     }
-
+  
     @GetMapping("/order/myreviews")
     public ResponseEntity<?> getMyReviews(
             @ModelAttribute SearchDTO searchDTO,
             @PageableDefault(size = 5) Pageable pageable) {
-
         Integer userId = 1;
-
         PageResponseDTO<ReviewResponse> pageResponse = reviewService.getMyReviews(userId, searchDTO, pageable);
-
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 조회했습니다.", pageResponse));
     }
-
+    
     @PutMapping(value = "/order/myreviews/{reviewId}")
     public ResponseEntity<?> updateMyReviews(
             @PathVariable("reviewId") Integer reviewId,
@@ -62,25 +56,21 @@ public class ReviewController {
             @RequestParam("content") String content,
             @RequestParam(value = "removedImageUrls", required = false) String[] removedImageUrls,
             @RequestParam(value = "images", required = false) MultipartFile[] newImages) throws IOException {
-
-            List<String> removedImageList = removedImageUrls != null ? Arrays.asList(removedImageUrls) : new ArrayList<>();
-
-            ReviewResponse updatedReview = reviewService.updateReview(
-                    reviewId,
-                    score,
-                    content,
-                    removedImageList,
-                    newImages
-            );
-            return ResponseEntity.ok()
-                    .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 수정했습니다.", updatedReview));
+        List<String> removedImageList = removedImageUrls != null ? Arrays.asList(removedImageUrls) : new ArrayList<>();
+        ReviewResponse updatedReview = reviewService.updateReview(
+                reviewId,
+                score,
+                content,
+                removedImageList,
+                newImages
+        );
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 수정했습니다.", updatedReview));
     }
-
+    
     @DeleteMapping("/order/myreviews/{reviewId}/delete")
     public ResponseEntity<?> deleteMyReview(@PathVariable("reviewId") Integer reviewId) {
-
         reviewService.deleteReview(reviewId);
-
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 삭제했습니다.", null));
     }
