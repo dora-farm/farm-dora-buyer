@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface UserDashboardService {
 
-    UserDashboardDTO getDashboardInfo(@Param("userId") Integer userId);
+    UserDashboardDTO getDashboardInfo(Integer userId);
 
-    List<OrderStatusDTO> getOrderStatusByUserId(@Param("userId") Integer userId);
+    List<OrderStatusDTO> getOrderStatusByUserId(Integer userId);
 
-    List<WishlistDTO> getWishlistByUserId(@Param("userId") Integer userId);
+    List<WishlistDTO> getWishlistByUserId(Integer userId);
 }

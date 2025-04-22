@@ -34,16 +34,16 @@ public interface UserDashboardRepository extends JpaRepository<User, Integer> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
-    @Query(value =
-            "SELECT s.sale_id, s.title, o.name, o.price, sf.save_file " +
-                    "FROM `like` l " +
-                    "JOIN sale s ON l.sale_id = s.sale_id " +
-                    "JOIN `option` o ON s.sale_id = o.sale_id AND o.option_id = (" +
-                    "SELECT MIN(option_id) " +
-                    "FROM `option` " +
-                    "WHERE sale_id = s.sale_id) " +
-                    "JOIN sale_file sf ON s.sale_id = sf.sale_id AND sf.is_main = 0 " +
-                    "WHERE l.user_id = :userId",
+    @Query(value = "SELECT s.sale_id, s.title, o.name, o.price, sf.save_file, " +
+            "ROUND(AVG(re.score), 1) AS avg_score, COUNT(DISTINCT review_id) AS review_count " +
+            "FROM `like` l " +
+            "JOIN sale s ON l.sale_id = s.sale_id " +
+            "JOIN `option` o ON s.sale_id = o.sale_id AND o.option_id = ( " +
+            "    SELECT MIN(option_id) FROM `option` WHERE sale_id = s.sale_id) " +
+            "JOIN sale_file sf ON s.sale_id = sf.sale_id AND sf.is_main = 0 " +
+            "LEFT JOIN review re ON s.sale_id = re.sale_id " +
+            "WHERE l.user_id = :userId " +
+            "GROUP BY s.sale_id, s.title, o.name, o.price, sf.save_file",
             nativeQuery = true)
     List<Object[]> findWishlistByUserId(@Param("userId") Integer userId);
 

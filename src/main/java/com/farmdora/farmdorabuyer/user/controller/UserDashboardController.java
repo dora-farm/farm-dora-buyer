@@ -42,7 +42,7 @@ public class UserDashboardController {
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_ORDERSTATUSINFO_SUCCESS.getMessage(), orderStatusCounts));
     }
 
-    @GetMapping("/preview")
+    @GetMapping("/wishlist")
     public ResponseEntity<?> getWishlist(@RequestParam Integer userId) {
 
         List<WishlistDTO> wishlists = userDashboardService.getWishlistByUserId(userId);
