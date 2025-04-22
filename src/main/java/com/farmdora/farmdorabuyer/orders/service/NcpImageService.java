@@ -10,16 +10,13 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.farmdora.farmdorabuyer.common.exception.FileException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Service
@@ -28,7 +25,6 @@ public class NcpImageService {
 
     private final AmazonS3 s3Client;
     private final String bucketName;
-    private final String cdnDomain;
 
     // 이미지 최적화 기본 옵션
     private final String defaultOptions = "type=f_auto&quality=90&autorotate=true";
@@ -37,7 +33,6 @@ public class NcpImageService {
             @Value("${ncp.object-storage.endpoint}") String endpoint,
             @Value("${ncp.object-storage.region}") String region,
             @Value("${ncp.object-storage.bucket}") String bucketName,
-            @Value("${ncp.image-optimizer.cdn-domain}") String cdnDomain,
             @Value("${ncp.access-key}") String accessKey,
             @Value("${ncp.secret-key}") String secretKey) {
 
@@ -49,7 +44,6 @@ public class NcpImageService {
                 .build();
 
         this.bucketName = bucketName;
-        this.cdnDomain = cdnDomain;
 
     }
 
