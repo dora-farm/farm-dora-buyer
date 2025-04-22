@@ -12,7 +12,7 @@ public interface PayRepository extends JpaRepository<Pay, Integer> {
     List<Pay> findByOrderIn(List<Order> orders);
 
     // 주문 ID로 결제정보 조회
-    Optional<Pay> findByOrderId(Integer orderId);
+    Pay findByOrderId(Integer orderId);
 
 
     Pay findByOrder(Order order);

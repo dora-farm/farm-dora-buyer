@@ -37,14 +37,11 @@ public class RefundDTO {
         private boolean isProcess;
         private LocalDateTime createdDate;
         private List<String> imageUrls;
-        private String paymentMethod;
-        private Integer paymentAmount;
-        private String refundAccountInfo;
         private List<OrderOptionInfo> orderOptions;
 
         // fromEntity 정적 메서드
         public static RefundResponse fromEntity(Refund refund, List<RefundFile> refundFiles,
-                                                List<OrderOption> orderOptions, Pay payInfo,
+                                                List<OrderOption> orderOptions,
                                                 Sale sale, SaleFile mainImage,
                                                 NcpImageService ncpImageService) {
             // 이미지 URL 리스트 생성
@@ -67,10 +64,6 @@ public class RefundDTO {
                     .isProcess(refund.isProcess())
                     .createdDate(refund.getCreatedDate())
                     .imageUrls(imageUrls)
-                    .paymentMethod(payInfo != null ? payInfo.getMethod() : "")
-                    .paymentAmount(payInfo != null ? payInfo.getAmount() : 0)
-                    .refundAccountInfo(payInfo != null ?
-                            (payInfo.getBankName() + " " + payInfo.getAccountNum()) : "")
                     .orderOptions(optionInfos)
                     .build();
         }
@@ -109,7 +102,6 @@ public class RefundDTO {
     public static class RefundListItem {
         private Integer refundId;
         private Integer orderId;
-        private String orderNumber;
         private String productName;
         private String productImage;
         private String refundTypeName;
@@ -121,7 +113,6 @@ public class RefundDTO {
             return RefundListItem.builder()
                     .refundId(refund.getId())
                     .orderId(refund.getOrder().getId())
-                    .orderNumber(refund.getOrder().getId().toString()) // 실제 주문번호 형식으로 수정 필요
                     .productName(sale != null ? sale.getTitle() : "")
                     .productImage(mainImage != null ? mainImage.getSaveFile() : "")
                     .refundTypeName(refund.getType().getName())

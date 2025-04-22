@@ -92,14 +92,10 @@ public class RefundService {
 
         Optional<SaleFile> mainImage = saleFileRepository.findBySaleIdAndIsMainTrue(sale.getId());
 
-        Pay payInfo = payRepository.findByOrderId(order.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("pay", order.getId()));
-
         return RefundResponse.fromEntity(
                 savedRefund,
                 savedFiles,
                 orderOptions,
-                payInfo,
                 sale,
                 mainImage.orElse(null),
                 ncpImageService
