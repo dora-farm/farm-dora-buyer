@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
 import com.farmdora.farmdorabuyer.basket.service.BasketService;
+import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -69,5 +70,25 @@ class BasketControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status", equalTo(400)))
                 .andExpect(jsonPath("$.message", equalTo("Option 데이터가 존재하지 않습니다 : '1'")));
+    }
+
+    @Test
+    @DisplayName("장바구니 추가시 장바구니가 이미 존재할 경우 에러처리 테스트")
+    void testAddBasket_ResourceAlreadyExistsException() throws Exception {
+        // given
+        doThrow(new ResourceAlreadyExistsException("Basket", 1)).when(basketService).addBasket(anyInt(), any(BasketRequestDto.class));
+
+        // when
+        // then
+        BasketRequestDto basketAddRequest = BasketRequestDto.builder()
+                .optionId(1)
+                .quantity(10)
+                .build();
+        mvc.perform(post("/api/basket")
+                        .content(new ObjectMapper().writeValueAsString(basketAddRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status", equalTo(409)))
+                .andExpect(jsonPath("$.message", equalTo("Basket 이미 존재하는 데이터입니다. : '1'")));
     }
 }

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
 import com.farmdora.farmdorabuyer.basket.repository.BasketRepository;
+import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Option;
@@ -81,5 +82,35 @@ class BasketServiceTest {
                 .build();
         assertThatThrownBy(() -> basketService.addBasket(1, basketAddRequest))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("장바구니 추가시 이미 존재할 경우 예외 발생")
+    void testAddBasket_BasketAlreadyExistsException() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        Option mockOption = Option.builder()
+                .name("옵션")
+                .build();
+        when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
+
+        Basket mockBasket = Basket.builder()
+                .user(mockUser)
+                .option(mockOption)
+                .build();
+        when(basketRepository.findByUserAndOption(any(User.class), any(Option.class))).thenReturn(Optional.of(mockBasket));
+
+        // when
+        // then
+        BasketRequestDto basketAddRequest = BasketRequestDto.builder()
+                .optionId(1)
+                .quantity(10)
+                .build();
+        assertThatThrownBy(() -> basketService.addBasket(1, basketAddRequest))
+                .isInstanceOf(ResourceAlreadyExistsException.class);
     }
 }
