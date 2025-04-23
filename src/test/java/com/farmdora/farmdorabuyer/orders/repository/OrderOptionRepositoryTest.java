@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,14 +18,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OrderOptionRepositoryTest {
 
     @Autowired
-    private TestEntityManager testEntityManager;
+    private TestEntityManager em;
 
     @Autowired
     private OrderOptionRepository orderOptionRepository;
 
     private Order order;
-    LocalDateTime orderTime = order.getCreatedDate();
-
     private Pay pay;
     private PayStatus payStatus;
     private OrderStatus orderStatus;
@@ -37,30 +33,30 @@ class OrderOptionRepositoryTest {
     void setUp() {
         User user = User.builder()
                 .build();
-        testEntityManager.persist(user);
+        em.persist(user);
 
-        OrderStatus orderStatus = OrderStatus.builder()
+        orderStatus = OrderStatus.builder()
                 .id((short) 2) // 배송중
                 .build();
-        testEntityManager.persist(orderStatus);
+        em.persist(orderStatus);
 
-        Order order = Order.builder()
+        order = Order.builder()
                 .user(user)
                 .status(orderStatus)
                 .build();
-        testEntityManager.persist(order);
+        em.persist(order);
 
         Sale sale = Sale.builder()
                 .title("제주 삼다수")
                 .build();
-        testEntityManager.persist(sale);
+        em.persist(sale);
 
-        SaleFile saleFile = SaleFile.builder()
+        saleFile = SaleFile.builder()
                 .sale(sale)
                 .saveFile("sample_image.jpg")
                 .isMain(true)
                 .build();
-        testEntityManager.persist(saleFile);
+        em.persist(saleFile);
 
         Option option1 = Option.builder()
                 .sale(sale)
@@ -72,8 +68,8 @@ class OrderOptionRepositoryTest {
                 .name("1L")
                 .price(2000)
                 .build();
-        testEntityManager.persist(option1);
-        testEntityManager.persist(option2);
+        em.persist(option1);
+        em.persist(option2);
 
         OrderOption orderOption1 = OrderOption.builder()
                 .order(order)
@@ -81,7 +77,7 @@ class OrderOptionRepositoryTest {
                 .quantity(3)
                 .price(option1.getPrice() * 3)
                 .build();
-        testEntityManager.persist(orderOption1);
+        em.persist(orderOption1);
 
         OrderOption orderOption2 = OrderOption.builder()
                 .order(order)
@@ -89,21 +85,21 @@ class OrderOptionRepositoryTest {
                 .quantity(5)
                 .price(option2.getPrice() * 5)
                 .build();
-        testEntityManager.persist(orderOption2);
+        em.persist(orderOption2);
 
-        PayStatus payStatus = PayStatus.builder()
+        payStatus = PayStatus.builder()
                 .id((short) 2) // 결제완료
                 .build();
-        testEntityManager.persist(payStatus);
+        em.persist(payStatus);
 
-        Pay pay = Pay.builder()
+        pay = Pay.builder()
                 .order(order)
                 .status(payStatus)
                 .amount(orderOption1.getPrice() + orderOption2.getPrice())
                 .build();
-        testEntityManager.persist(pay);
+        em.persist(pay);
 
-        testEntityManager.flush();
+        em.flush();
     }
 
     @Test
@@ -135,7 +131,7 @@ class OrderOptionRepositoryTest {
         assertThat(foundSale1.getTitle()).isEqualTo("제주 삼다수");
         assertThat(foundSale2.getTitle()).isEqualTo("제주 삼다수");
 
-        assertThat(order.getCreatedDate()).isEqualTo(orderTime);
+        assertThat(order.getCreatedDate()).isEqualTo(order.getCreatedDate());
         assertThat(pay.getAmount()).isEqualTo(13000);
         assertThat(payStatus.getId()).isEqualTo((short) 2);
         assertThat(orderStatus.getId()).isEqualTo((short) 2);
