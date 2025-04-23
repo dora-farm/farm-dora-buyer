@@ -38,7 +38,7 @@ public class RefundController {
                 .body(new HttpResponse(HttpStatus.OK, "환불 요청이 성공적으로 등록되었습니다.", response));
     }
 
-    @GetMapping("order/refundTypes")
+    @GetMapping("/order/refundTypes")
     public ResponseEntity<?> getRefundTypes() {
         List<RefundTypeInfo> refundTypes = refundService.getRefundTypes();
 
