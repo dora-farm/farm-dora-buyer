@@ -2,7 +2,6 @@ package com.farmdora.farmdorabuyer.orders.controller;
 
 import com.farmdora.farmdorabuyer.common.response.HttpResponse;
 import com.farmdora.farmdorabuyer.orders.dto.RefundDTO.*;
-import com.farmdora.farmdorabuyer.orders.repository.RefundTypeRepository;
 import com.farmdora.farmdorabuyer.orders.service.RefundService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
