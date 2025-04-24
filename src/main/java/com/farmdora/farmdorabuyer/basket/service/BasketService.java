@@ -1,6 +1,7 @@
 package com.farmdora.farmdorabuyer.basket.service;
 
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
+import com.farmdora.farmdorabuyer.basket.dto.BasketResponseDto;
 import com.farmdora.farmdorabuyer.basket.repository.BasketRepository;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
@@ -9,6 +10,7 @@ import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,5 +42,16 @@ public class BasketService {
                 .quantity(basketAddRequest.getQuantity())
                 .build();
         basketRepository.save(basket);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BasketResponseDto> getBaskets(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        List<Basket> baskets = basketRepository.findAllByUser(user);
+        return baskets.stream()
+                .map(BasketResponseDto::fromEntity)
+                .toList();
     }
 }
