@@ -1,5 +1,6 @@
 package com.farmdora.farmdorabuyer.basket.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -8,14 +9,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
+import com.farmdora.farmdorabuyer.basket.dto.BasketResponseDto;
 import com.farmdora.farmdorabuyer.basket.repository.BasketRepository;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Option;
+import com.farmdora.farmdorabuyer.entity.Sale;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -112,5 +116,49 @@ class BasketServiceTest {
                 .build();
         assertThatThrownBy(() -> basketService.addBasket(1, basketAddRequest))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
+
+    @Test
+    @DisplayName("사용자의 장바구니 목록 조회")
+    void testGetBaskets() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        Sale mockSale = Sale.builder()
+                .id(1)
+                .title("상품")
+                .build();
+
+        Option mockOption = Option.builder()
+                .id(1)
+                .sale(mockSale)
+                .name("옵션")
+                .build();
+
+        List<Basket> baskets = List.of(
+                Basket.builder()
+                        .user(mockUser)
+                        .quantity(2)
+                        .option(mockOption)
+                        .build(),
+                Basket.builder()
+                        .user(mockUser)
+                        .quantity(10)
+                        .option(mockOption)
+                        .build()
+        );
+        when(basketRepository.findAllByUser(any(User.class))).thenReturn(baskets);
+
+        // when
+        List<BasketResponseDto> result = basketService.getBaskets(1);
+
+        // then
+        BasketResponseDto basket1 = result.get(0);
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(basket1.getTitle()).isEqualTo("상품");
+        assertThat(basket1.getQuantity()).isEqualTo(2);
     }
 }
