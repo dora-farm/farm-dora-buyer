@@ -2,12 +2,15 @@ package com.farmdora.farmdorabuyer.basket.controller;
 
 import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.ADD_BASKET_SUCCESS;
 import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.GET_BASKETS_SUCCESS;
+import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.REMOVE_BASKET_SUCCESS;
+import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.UPDATE_BASKET_QUANTITY_SUCCESS;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -126,5 +129,63 @@ class BasketControllerTest {
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(GET_BASKETS_SUCCESS.getMessage())))
                 .andExpect(jsonPath("$.data.size()", equalTo(2)));
+    }
+
+    @Test
+    @DisplayName("사용자의 장바구니 삭제 API 테스트")
+    void testRemoveBasket() throws Exception {
+        // given
+        doNothing().when(basketService).removeBasket(anyInt(), anyInt());
+
+        // when
+        // then
+        mvc.perform(delete("/api/basket/{basketId}", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo(200)))
+                .andExpect(jsonPath("$.message", equalTo(REMOVE_BASKET_SUCCESS.getMessage())));
+    }
+
+    @Test
+    @DisplayName("사용자의 장바구니 삭제시 장바구니가 없을 경우 에러처리 테스트")
+    void testRemoveBasket_ResourceNotFoundException() throws Exception {
+        // given
+        doThrow(new ResourceNotFoundException("Basket", 1)).when(basketService).removeBasket(anyInt(), anyInt());
+
+        // when
+        // then
+        mvc.perform(delete("/api/basket/{basketId}", 1))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", equalTo(400)))
+                .andExpect(jsonPath("$.message", equalTo("Basket 데이터가 존재하지 않습니다 : '1'")));
+    }
+
+    @Test
+    @DisplayName("사용자의 장바구니 수량 수정 API 테스트")
+    void testUpdateQuantity() throws Exception{
+        // given
+        doNothing().when(basketService).updateBasketQuantity(anyInt(), anyInt(), anyInt());
+
+        // when
+        // then
+        mvc.perform(put("/api/basket/{basketId}", 1)
+                .param("quantity", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo(200)))
+                .andExpect(jsonPath("$.message", equalTo(UPDATE_BASKET_QUANTITY_SUCCESS.getMessage())));
+    }
+
+    @Test
+    @DisplayName("사용자의 장바구니 수량 수정시 장바구니가 존재하지 않을 경우 에러처리 테스트")
+    void testUpdateQuantity_ResourceNotFoundException() throws Exception{
+        // given
+        doThrow(new ResourceNotFoundException("Basket", 1)).when(basketService).updateBasketQuantity(anyInt(), anyInt(), anyInt());
+
+        // when
+        // then
+        mvc.perform(put("/api/basket/{basketId}", 1)
+                        .param("quantity", "10"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", equalTo(400)))
+                .andExpect(jsonPath("$.message", equalTo("Basket 데이터가 존재하지 않습니다 : '1'")));
     }
 }

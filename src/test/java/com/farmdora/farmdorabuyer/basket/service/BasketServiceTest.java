@@ -161,4 +161,83 @@ class BasketServiceTest {
         assertThat(basket1.getTitle()).isEqualTo("상품");
         assertThat(basket1.getQuantity()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("사용자의 특정 장바구니 삭제 서비스 레이어 테스트")
+    void testRemoveBasket() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        Basket mockBasket = Basket.builder()
+                .id(1)
+                .user(mockUser)
+                .build();
+        when(basketRepository.findByIdAndUser(anyInt(), any(User.class))).thenReturn(Optional.of(mockBasket));
+
+        // when
+        basketService.removeBasket(1, 1);
+
+        // then
+        verify(basketRepository, times(1)).delete(any(Basket.class));
+    }
+
+    @Test
+    @DisplayName("사용자의 특정 장바구니 삭제시 장바구니가 존재하지 않을 경우 예외 발생 테스트")
+    void testRemoveBasket_ResourceNotFoundException() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        when(basketRepository.findByIdAndUser(anyInt(), any(User.class))).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> basketService.removeBasket(1, 1))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("사용자의 장바구니 수량 수정 서비스 레이어 테스트")
+    void testUpdateBasketQuantity() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        Basket mockBasket = Basket.builder()
+                .id(1)
+                .user(mockUser)
+                .quantity(1)
+                .build();
+        when(basketRepository.findByIdAndUser(anyInt(), any(User.class))).thenReturn(Optional.of(mockBasket));
+
+        // when
+        basketService.updateBasketQuantity(1, 1, 10);
+
+        // then
+        assertThat(mockBasket.getQuantity()).isEqualTo(10);
+    }
+
+    @Test
+    @DisplayName("사용자의 장바구니 수량 수정시 장바구니가 존재하지 않을 경우 예외 발생 테스트")
+    void testUpdateBasketQuantity_ResourceNotFoundException() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        when(basketRepository.findByIdAndUser(anyInt(), any(User.class))).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThatThrownBy(() -> basketService.updateBasketQuantity(1, 1, 10))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 }
