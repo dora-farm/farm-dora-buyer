@@ -80,4 +80,34 @@ class BasketRepositoryTest {
         // then
         assertThat(baskets.size()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("findByIdAndUser() 쿼리메서드 테스트")
+    void testFindByIdAndUser() {
+        // given
+        User user = new User();
+        em.persist(user);
+
+        Option option = Option.builder()
+                .name("옵션")
+                .build();
+        em.persist(option);
+
+        Basket basket = Basket.builder()
+                .user(user)
+                .option(option)
+                .quantity(2)
+                .build();
+        em.persist(basket);
+
+        em.flush();
+        em.clear();
+
+        // when
+        Optional<Basket> savedBasket = basketRepository.findByIdAndUser(basket.getId(), user);
+
+        // then
+        assertThat(savedBasket.isPresent()).isEqualTo(true);
+        assertThat(savedBasket.get().getQuantity()).isEqualTo(2);
+    }
 }
