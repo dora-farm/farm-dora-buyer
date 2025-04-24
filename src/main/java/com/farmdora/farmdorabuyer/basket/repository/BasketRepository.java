@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BasketRepository extends JpaRepository<Basket, Integer> {
     Optional<Basket> findByUserAndOption(User user, Option option);
+    Long countByUser(User user);
 }
