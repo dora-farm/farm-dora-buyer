@@ -54,6 +54,7 @@ public class BasketService {
                 .map(BasketResponseDto::fromEntity)
                 .toList();
     }
+
     public void removeBasket(Integer userId, Integer basketId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
@@ -64,4 +65,13 @@ public class BasketService {
         basketRepository.delete(basket);
     }
 
+    public void updateBasketQuantity(Integer userId, Integer basketId, int quantity) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        Basket basket = basketRepository.findByIdAndUser(basketId, user)
+                .orElseThrow(() -> new ResourceNotFoundException("Basket", basketId));
+
+        basket.updateQuantity(quantity);
+    }
 }
