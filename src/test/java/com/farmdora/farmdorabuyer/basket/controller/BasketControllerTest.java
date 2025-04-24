@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
+import com.farmdora.farmdorabuyer.basket.exception.BasketOverLimitException;
 import com.farmdora.farmdorabuyer.basket.service.BasketService;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -90,5 +92,25 @@ class BasketControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status", equalTo(409)))
                 .andExpect(jsonPath("$.message", equalTo("Basket 이미 존재하는 데이터입니다. : '1'")));
+    }
+
+    @Test
+    @DisplayName("장바구니 추가시 16개가 넘을 경우 에러처리 테스트")
+    void testAddBasket_BasketOverLimitException() throws Exception {
+        // given
+        doThrow(new BasketOverLimitException("장바구니 개수가 최대입니다.", HttpStatus.BAD_REQUEST)).when(basketService).addBasket(anyInt(), any(BasketRequestDto.class));
+
+        // when
+        // then
+        BasketRequestDto basketAddRequest = BasketRequestDto.builder()
+                .optionId(1)
+                .quantity(10)
+                .build();
+        mvc.perform(post("/api/basket")
+                .content(new ObjectMapper().writeValueAsString(basketAddRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", equalTo(400)))
+                .andExpect(jsonPath("$.message", equalTo("장바구니 개수가 최대입니다.")));
     }
 }
