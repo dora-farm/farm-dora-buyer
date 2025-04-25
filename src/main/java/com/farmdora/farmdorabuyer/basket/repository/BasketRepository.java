@@ -13,4 +13,6 @@ public interface BasketRepository extends JpaRepository<Basket, Integer> {
 
     @EntityGraph(attributePaths = {"option", "option.sale"})
     List<Basket> findAllByUser(User user);
+
+    Long countByUser(User user);
 }
