@@ -4,3 +4,16 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
+ncp:
+  object-storage:
+    endpoint: https://kr.object.ncloudstorage.com
+    region: kr-standard
+    bucket: farmdora
+
+  image-optimizer:
+    project-id: Gv9VppsiR9
+    cdn-domain: aacblnby9780.edge.naverncp.com
+
+  access-key: ncp_iam_BPASKR5nKujGrW7C2yV5
+  secret-key: ncp_iam_BPKSKRPXwNzYCHv9zMJfroeR2XA8e47gQv
