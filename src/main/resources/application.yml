@@ -5,3 +5,16 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+ncp:
+  object-storage:
+    endpoint: https://kr.object.ncloudstorage.com
+    region: kr-standard
+    bucket: bitcamp-68
+
+  image-optimizer:
+    project-id: O8XfcLSSm6
+    cdn-domain: zcbg41sa9729.edge.naverncp.com
+
+  access-key: ncp_iam_BPASKR58WWMsf2TNfnO6
+  secret-key: ncp_iam_BPKSKRJPZ8hGri6MHWZ5kpcwsF8tFGXakF
