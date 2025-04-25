@@ -123,6 +123,11 @@ class BasketServiceTest {
     @DisplayName("장바구니 추가시 장바구니 목록이 이미 16개일 경우 예외 발생")
     void testAddBasket_BasketOverLimitException() {
         // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
         Option mockOption = Option.builder()
                 .id(1)
                 .name("옵션")
