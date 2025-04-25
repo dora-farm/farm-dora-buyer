@@ -31,8 +31,9 @@ public class ReviewService {
     private final ReviewFileRepository reviewFileRepository;
     private final SaleRepository saleRepository;
     private final OrderRepository orderRepository;
-    private final NcpImageService ncpImageService;
+    private final NCPObjectStorageService ncpImageService;
     private final OrderOptionRepository orderOptionRepository;
+    private final SaleFileRepository saleFileRepository;
 
     @Transactional
     public void createReview(Integer userId, ReviewRequest request, List<MultipartFile> files) throws IOException {
@@ -56,7 +57,7 @@ public class ReviewService {
         for(MultipartFile file: files) {
             try {
                 String originalFilename = file.getOriginalFilename();
-                String savedFilename  = ncpImageService.uploadImage(file);
+                String savedFilename  = ncpImageService.uploadImage(file, "review");
 
                 // 리뷰 파일 정보 저장
                 ReviewFile reviewFile = ReviewFile.builder()
@@ -99,7 +100,11 @@ public class ReviewService {
                             .filter(option -> option.getOption().getSale().getId().equals(review.getSale().getId()))
                             .map(OrderOptionInfo::fromEntity)
                             .toList();
-                    return ReviewResponse.fromEntity(review, reviewFiles, filteredOrderOptions, ncpImageService);
+
+                    // 해당 상품의 이미지 목록 조회
+                    List<SaleFile> saleFiles = saleFileRepository.findBySaleId(review.getSale().getId());
+
+                    return ReviewResponse.fromEntity(review, reviewFiles, filteredOrderOptions, ncpImageService, saleFiles);
                 })
                 .collect(Collectors.toList());
 
@@ -130,15 +135,23 @@ public class ReviewService {
                 String reviewFileName = extractFilenameDeleteUrl(imageUrl);
                 ReviewFile reviewFile = reviewFileRepository.findBySaveFileAndReviewId(reviewFileName, reviewId);
 
-                ncpImageService.deleteObjectToNCP(reviewFileName);
-                reviewFileRepository.delete(reviewFile);
+                if(reviewFile != null) {
+                    String savedFileName = reviewFile.getSaveFile();
+
+                    String fullPath = savedFileName.startsWith("review/")
+                            ? savedFileName
+                            : "review/" + savedFileName;
+
+                    ncpImageService.delete(fullPath);
+                    reviewFileRepository.delete(reviewFile);
+                }
             }
         }
 
         List<ReviewFile> NewUpdatedReviewFiles = new ArrayList<>(reviewFileRepository.findAllByReviewId(reviewId));
         if (newImages != null) {
             for (MultipartFile image : newImages) {
-                String UpdateFileName = ncpImageService.uploadImage(image);
+                String UpdateFileName = ncpImageService.uploadImage(image, "review");
 
                 ReviewFile reviewFile = ReviewFile.builder()
                         .review(review)
@@ -159,12 +172,27 @@ public class ReviewService {
                 .map(OrderOptionInfo::fromEntity)
                 .collect(Collectors.toList());
 
+        // 해당 상품의 이미지 목록 조회 (업데이트 시에도 이미지 정보 추가)
+        List<SaleFile> saleFiles = saleFileRepository.findBySaleId(review.getSale().getId());
+
         // 응답 DTO 생성 및 반환
-        return ReviewResponse.fromEntity(review, NewUpdatedReviewFiles, filteredOrderOptions, ncpImageService);
+        return ReviewResponse.fromEntity(review, NewUpdatedReviewFiles, filteredOrderOptions, ncpImageService, saleFiles);
     }
 
     private String extractFilenameDeleteUrl(String imageUrl) {
-        return imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+        // URL에서 쿼리 파라미터 제거
+        if (imageUrl.contains("?")) {
+            imageUrl = imageUrl.substring(0, imageUrl.indexOf("?"));
+        }
+
+        // URL에서 파일명 추출
+        String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+
+        if (imageUrl.contains("/review/")) {
+            fileName = "review/" + fileName;
+        }
+
+        return fileName;
     }
 
     @Transactional
@@ -174,12 +202,11 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
 
-
         List<ReviewFile> reviewFiles = reviewFileRepository.findAllByReviewId(reviewId);
 
         for(ReviewFile reviewFile : reviewFiles) {
             try {
-                ncpImageService.deleteObjectToNCP(reviewFile.getSaveFile());
+                ncpImageService.delete(reviewFile.getSaveFile());
                 reviewFileRepository.delete(reviewFile);
             } catch (Exception e) {
                 log.error("리뷰삭제 실패 : {}", reviewFile.getSaveFile(), e);

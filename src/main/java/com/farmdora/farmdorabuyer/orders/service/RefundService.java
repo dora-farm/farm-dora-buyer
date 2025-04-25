@@ -30,7 +30,7 @@ public class RefundService {
     private final PayStatusRepository payStatusRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final SaleFileRepository saleFileRepository;
-    private final NcpImageService ncpImageService;
+    private final NCPObjectStorageService ncpImageService;
 
     @Transactional
     public RefundResponse createRefund(
@@ -68,7 +68,7 @@ public class RefundService {
         for(MultipartFile file : files) {
             try {
                 String originalFileName = file.getOriginalFilename();
-                String savedFileName = ncpImageService.uploadImage(file);
+                String savedFileName = ncpImageService.uploadImage(file, "refund");
 
                 RefundFile refundFile = RefundFile.builder()
                         .refund(savedRefund)

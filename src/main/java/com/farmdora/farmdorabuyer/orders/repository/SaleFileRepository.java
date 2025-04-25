@@ -12,4 +12,6 @@ public interface SaleFileRepository extends JpaRepository<SaleFile, Integer> {
 
     Optional<SaleFile> findBySaleIdAndIsMainTrue(Integer saleId);
 
+    List<SaleFile> findBySaleId(Integer saleId);
+
 }
