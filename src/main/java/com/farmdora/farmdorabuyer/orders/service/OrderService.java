@@ -27,7 +27,7 @@ public class OrderService {
     private final PayRepository payRepository;
     private final PayStatusRepository payStatusRepository;
     private final SaleFileRepository saleFileRepository;
-    private final ReviewRepositry reviewRepositry;
+    private final ReviewRepository reviewRepository;
     private final OrderStatusRepository orderStatusRepository;
 
     @Transactional(readOnly = true)
@@ -109,7 +109,7 @@ public class OrderService {
                     optionInfos.add(optionDto);
                 }
 
-                boolean hasReview = reviewRepositry.existsByOrderAndSale(order, sale);
+                boolean hasReview = reviewRepository.existsByOrderAndSale(order, sale);
                 // Sale 정보 생성
                 SaleInfoDTO saleInfo = SaleInfoDTO.builder()
                         .saleId(saleId)

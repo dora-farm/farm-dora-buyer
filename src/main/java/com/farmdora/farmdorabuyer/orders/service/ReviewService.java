@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ReviewService {
 
-    private final ReviewRepositry reviewRepositry;
+    private final ReviewRepository reviewRepository;
     private final ReviewFileRepository reviewFileRepository;
     private final SaleRepository saleRepository;
     private final OrderRepository orderRepository;
@@ -51,7 +51,7 @@ public class ReviewService {
                 .content(request.getContent())
                 .build();
 
-        Review savedReview = reviewRepositry.save(review);
+        Review savedReview = reviewRepository.save(review);
 
         for(MultipartFile file: files) {
             try {
@@ -74,7 +74,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public PageResponseDTO<ReviewResponse> getMyReviews(Integer userId, SearchDTO searchDTO, Pageable pageable) {
-        Page<Review> reviewPage = reviewRepositry.findAllByOrderUserUserIdAndCreatedDateBetweenOrderByCreatedDateDesc(
+        Page<Review> reviewPage = reviewRepository.findAllByOrderUserUserIdAndCreatedDateBetweenOrderByCreatedDateDesc(
                 userId,
                 searchDTO.getStartDate(),
                 searchDTO.getEndDate(),
@@ -118,12 +118,12 @@ public class ReviewService {
         // jwt로 userId가져와야함
         Integer userId = 1;
 
-        Review review = reviewRepositry.findById(reviewId)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
 
         review.setScore(score);
         review.setContent(content);
-        reviewRepositry.save(review);
+        reviewRepository.save(review);
 
         if(removedImageUrls != null && !removedImageUrls.isEmpty()) {
             for(String imageUrl : removedImageUrls) {
@@ -171,7 +171,7 @@ public class ReviewService {
     public void deleteReview(Integer reviewId) {
         Integer userId = 1;
 
-        Review review = reviewRepositry.findById(reviewId)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
 
 
@@ -186,6 +186,6 @@ public class ReviewService {
             }
         }
 
-        reviewRepositry.delete(review);
+        reviewRepository.delete(review);
     }
 }
