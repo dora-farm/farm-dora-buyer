@@ -38,4 +38,13 @@ public class OrderOption {
     private Integer quantity;
 
     private Integer price;
+
+    public static OrderOption createOrderOption(Option option, Order order, Basket basket) {
+        return OrderOption.builder()
+                .option(option)
+                .order(order)
+                .quantity(basket.getQuantity())
+                .price(option.getPrice() * basket.getQuantity())
+                .build();
+    }
 }

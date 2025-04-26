@@ -38,4 +38,12 @@ public class Order extends BaseTimeEntity {
 
     @Embedded
     private Address address;
+
+    public static Order createOrder(User user, OrderStatus status, Address address) {
+        return Order.builder()
+                .user(user)
+                .status(status)
+                .address(address)
+                .build();
+    }
 }
