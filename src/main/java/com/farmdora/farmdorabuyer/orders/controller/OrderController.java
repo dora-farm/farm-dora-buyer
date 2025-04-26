@@ -1,8 +1,10 @@
 package com.farmdora.farmdorabuyer.orders.controller;
 
+import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.CANCEL_ORDER_SUCCESS;
+import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.SEARCH_ORDER_SUCCESS;
+
 import com.farmdora.farmdorabuyer.common.response.HttpResponse;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
-import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.service.OrderService;
@@ -11,11 +13,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.CANCEL_ORDER_SUCCESS;
-import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.CREATE_ORDER_SUCCESS;
-import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.SEARCH_ORDER_SUCCESS;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/my/user")
@@ -49,13 +52,5 @@ public class OrderController {
             return ResponseEntity.badRequest()
                     .body(new HttpResponse(HttpStatus.BAD_REQUEST, "주문 취소에 실패했습니다", null));
         }
-    }
-
-    @PostMapping("/order")
-    public ResponseEntity<?> order(@RequestBody OrderRequestDTO orderRequest)  throws InterruptedException {
-        Integer userId = 1;
-        orderService.order(userId, orderRequest);
-        return ResponseEntity.ok()
-                .body(new HttpResponse(HttpStatus.OK, CREATE_ORDER_SUCCESS.getMessage(), null));
     }
 }
