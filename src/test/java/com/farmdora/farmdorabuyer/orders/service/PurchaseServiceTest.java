@@ -20,18 +20,16 @@ import com.farmdora.farmdorabuyer.entity.OrderOption;
 import com.farmdora.farmdorabuyer.entity.OrderStatus;
 import com.farmdora.farmdorabuyer.entity.Sale;
 import com.farmdora.farmdorabuyer.entity.User;
-import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO;
+import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
+import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromOptionDTO;
 import com.farmdora.farmdorabuyer.orders.exception.NotUserOfDepotException;
 import com.farmdora.farmdorabuyer.orders.exception.OutOfStockException;
 import com.farmdora.farmdorabuyer.orders.repository.BasketRepository;
 import com.farmdora.farmdorabuyer.orders.repository.DepotRepository;
+import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderOptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderStatusRepository;
-import com.farmdora.farmdorabuyer.orders.repository.PayRepository;
-import com.farmdora.farmdorabuyer.orders.repository.PayStatusRepository;
-import com.farmdora.farmdorabuyer.orders.repository.ReviewRepositry;
-import com.farmdora.farmdorabuyer.orders.repository.SaleFileRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -44,25 +42,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class OrderServiceTest {
+class PurchaseServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
 
     @Mock
     private OrderOptionRepository orderOptionRepository;
-
-    @Mock
-    private PayRepository payRepository;
-
-    @Mock
-    private PayStatusRepository payStatusRepository;
-
-    @Mock
-    private SaleFileRepository saleFileRepository;
-
-    @Mock
-    private ReviewRepositry reviewRepositry;
 
     @Mock
     private OrderStatusRepository orderStatusRepository;
@@ -75,13 +61,21 @@ class OrderServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    
+    @Mock
+    private OptionRepository optionRepository;
 
     @InjectMocks
-    private OrderService orderService;
+    private PurchaseService purchaseService;
 
     @Nested
-    @DisplayName("주문 서비스 레이어 테스트")
-    class OrderTest {
+    @DisplayName("장바구니로 주문 서비스 레이어 테스트")
+    class OrderFromBasketsTests {
+
+        private static final OrderFromBasketDTO orderRequest = OrderFromBasketDTO.builder()
+                .basketIds(List.of(1, 2))
+                .depotId(1)
+                .build();
 
         @Test
         @DisplayName("주문 성공")
@@ -131,11 +125,7 @@ class OrderServiceTest {
             when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.of(mockOrderStatus));
 
             // when
-            OrderRequestDTO orderRequest = OrderRequestDTO.builder()
-                    .basketIds(List.of(1, 2))
-                    .depotId(1)
-                    .build();
-            orderService.order(1, orderRequest);
+            purchaseService.orderFromBaskets(1, orderRequest);
 
             // then
             verify(orderRepository, times(2)).save(any(Order.class));
@@ -152,7 +142,7 @@ class OrderServiceTest {
 
             // when
             // then
-            assertThatThrownBy(() -> orderService.order(1, new OrderRequestDTO()))
+            assertThatThrownBy(() -> purchaseService.orderFromBaskets(1, new OrderFromBasketDTO()))
                     .isInstanceOf(ResourceNotFoundException.class);
         }
 
@@ -168,11 +158,7 @@ class OrderServiceTest {
 
             // when
             // then
-            OrderRequestDTO orderRequest = OrderRequestDTO.builder()
-                    .basketIds(List.of(1, 2))
-                    .depotId(1)
-                    .build();
-            assertThatThrownBy(() -> orderService.order(1, orderRequest))
+            assertThatThrownBy(() -> purchaseService.orderFromBaskets(1, orderRequest))
                     .isInstanceOf(ResourceNotFoundException.class);
         }
 
@@ -194,11 +180,7 @@ class OrderServiceTest {
 
             // when
             // then
-            OrderRequestDTO orderRequest = OrderRequestDTO.builder()
-                    .basketIds(List.of(1, 2))
-                    .depotId(1)
-                    .build();
-            assertThatThrownBy(() -> orderService.order(1, orderRequest))
+            assertThatThrownBy(() -> purchaseService.orderFromBaskets(1, orderRequest))
                     .isInstanceOf(NotUserOfDepotException.class);
         }
 
@@ -248,11 +230,7 @@ class OrderServiceTest {
 
             // when
             // then
-            OrderRequestDTO orderRequest = OrderRequestDTO.builder()
-                    .basketIds(List.of(1, 2))
-                    .depotId(1)
-                    .build();
-            assertThatThrownBy(() -> orderService.order(1, orderRequest))
+            assertThatThrownBy(() -> purchaseService.orderFromBaskets(1, orderRequest))
                     .isInstanceOf(ResourceNotFoundException.class);
         }
 
@@ -305,11 +283,161 @@ class OrderServiceTest {
 
             // when
             // then
-            OrderRequestDTO orderRequest = OrderRequestDTO.builder()
-                    .basketIds(List.of(1, 2))
-                    .depotId(1)
+            assertThatThrownBy(() -> purchaseService.orderFromBaskets(1, orderRequest))
+                    .isInstanceOf(OutOfStockException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("옵션으로 주문 서비스 레이어 테스트")
+    class OrderFromOptionTests {
+
+        private static final OrderFromOptionDTO orderRequest = OrderFromOptionDTO.builder()
+                .optionId(1)
+                .depotId(1)
+                .quantity(1)
+                .build();
+
+        @Test
+        @DisplayName("주문 성공")
+        void testOrder() {
+            // given
+            User mockUser = User.builder()
+                    .userId(1)
                     .build();
-            assertThatThrownBy(() -> orderService.order(1, orderRequest))
+            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+            Depot depot = Depot.builder()
+                    .id(1)
+                    .user(mockUser)
+                    .address(new Address())
+                    .build();
+            when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
+
+            OrderStatus mockOrderStatus = OrderStatus.builder()
+                    .name("배송준비")
+                    .build();
+            when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.of(mockOrderStatus));
+
+            Option mockOption = Option.builder()
+                    .id(1)
+                    .price(10000)
+                    .quantity(10)
+                    .build();
+            when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
+
+            // when
+            purchaseService.orderFromOption(1, orderRequest);
+
+            // then
+            verify(orderRepository, times(1)).save(any(Order.class));
+            verify(orderOptionRepository, times(1)).save(any(OrderOption.class));
+            assertThat(mockOption.getQuantity()).isEqualTo(9);
+        }
+
+        @Test
+        @DisplayName("주문시 사용자가 존재하지 않을 경우 예외발생 테스트")
+        void testOrder_UserNotFoundException() {
+            // given
+            when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+            // when
+            // then
+            assertThatThrownBy(() -> purchaseService.orderFromOption(1, new OrderFromOptionDTO()))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("주문시 배송지가 존재하지 않을 경우 예외발생 테스트")
+        void testOrder_DepotNotFoundException() {
+            // given
+            User mockUser = User.builder()
+                    .userId(1)
+                    .build();
+            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+            when(depotRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+            // when
+            // then
+            assertThatThrownBy(() -> purchaseService.orderFromOption(1, orderRequest))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("주문시 조회한 배송지가 사용자의 배송지가 아닐 경우 예외발생 테스트")
+        void testOrder_NotDepotOfUserException() {
+            // given
+            User mockUser = User.builder()
+                    .userId(1)
+                    .build();
+            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+            Depot depot = Depot.builder()
+                    .id(1)
+                    .user(User.builder().userId(2).build())
+                    .address(new Address())
+                    .build();
+            when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
+
+            // when
+            // then
+            assertThatThrownBy(() -> purchaseService.orderFromOption(1, orderRequest))
+                    .isInstanceOf(NotUserOfDepotException.class);
+        }
+
+        @Test
+        @DisplayName("주문시 설정할 배송상태가 존재하지 않을 경우 예외발생 테스트")
+        void testOrder_OrderStatusNotFoundException() {
+            // given
+            User mockUser = User.builder()
+                    .userId(1)
+                    .build();
+            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+            Depot depot = Depot.builder()
+                    .id(1)
+                    .user(mockUser)
+                    .address(new Address())
+                    .build();
+            when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
+
+            when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+            // when
+            // then
+            assertThatThrownBy(() -> purchaseService.orderFromOption(1, orderRequest))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("주문시 주문한 수량이 옵션의 재고를 초과할 경우 예외발생 테스트")
+        void testOrder_OutOfStockException() {
+            // given
+            User mockUser = User.builder()
+                    .userId(1)
+                    .build();
+            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+            Depot depot = Depot.builder()
+                    .id(1)
+                    .user(mockUser)
+                    .address(new Address())
+                    .build();
+            when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
+
+            OrderStatus mockOrderStatus = OrderStatus.builder()
+                    .name("배송준비")
+                    .build();
+            when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.of(mockOrderStatus));
+
+            // when
+            // then
+            OrderFromOptionDTO orderRequest = OrderFromOptionDTO.builder()
+                    .depotId(1)
+                    .optionId(1)
+                    .quantity(11)
+                    .build();
+            assertThatThrownBy(() -> purchaseService.orderFromOption(1, orderRequest))
                     .isInstanceOf(OutOfStockException.class);
         }
     }
