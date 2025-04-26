@@ -39,12 +39,12 @@ public class OrderOption {
 
     private Integer price;
 
-    public static OrderOption createOrderOption(Option option, Order order, Basket basket) {
+    public static OrderOption createOrderOption(Option option, Order order, Integer quantity, Integer price) {
         return OrderOption.builder()
                 .option(option)
                 .order(order)
-                .quantity(basket.getQuantity())
-                .price(option.getPrice() * basket.getQuantity())
+                .quantity(quantity)
+                .price(price * quantity)
                 .build();
     }
 }
