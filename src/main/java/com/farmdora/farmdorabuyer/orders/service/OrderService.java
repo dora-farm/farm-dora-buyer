@@ -3,12 +3,9 @@ package com.farmdora.farmdorabuyer.orders.service;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
 import com.farmdora.farmdorabuyer.entity.*;
-import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO.*;
 import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
-import com.farmdora.farmdorabuyer.orders.exception.NotUserOfDepotException;
-import com.farmdora.farmdorabuyer.orders.exception.OutOfStockException;
 import com.farmdora.farmdorabuyer.orders.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +29,6 @@ public class OrderService {
     private final SaleFileRepository saleFileRepository;
     private final ReviewRepositry reviewRepositry;
     private final OrderStatusRepository orderStatusRepository;
-    private final DepotRepository depotRepository;
-    private final BasketRepository basketRepository;
-    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public PageResponseDTO<OrderResponseDTO> getOrderList(Integer userId, SearchDTO SearchDTO, Pageable pageable) {
@@ -159,65 +153,5 @@ public class OrderService {
         }
 
         return true;
-    }
-
-    @Transactional
-    public void order(Integer userId, OrderRequestDTO orderRequest) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-
-        Depot depot = depotRepository.findById(orderRequest.getDepotId())
-                .orElseThrow(() -> new ResourceNotFoundException("Depot", orderRequest.getDepotId()));
-        checkDepotOfUser(depot, user);
-
-        List<Basket> baskets = basketRepository.findAllByIdIn(orderRequest.getBasketIds());
-        Map<Sale, List<Basket>> groupedBaskets = groupBaskets(baskets);
-
-        OrderStatus status = orderStatusRepository.findByName("배송준비")
-                .orElseThrow(() -> new ResourceNotFoundException("OrderStatus", "배송준비"));
-
-        saveOrders(user, depot, groupedBaskets, status);
-
-        // TODO Pay 진행
-    }
-
-    private void checkDepotOfUser(Depot depot, User user) {
-        if (!depot.getUser().equals(user)) {
-            throw new NotUserOfDepotException();
-        }
-    }
-
-    private Map<Sale, List<Basket>> groupBaskets(List<Basket> baskets) {
-        return baskets
-                .stream()
-                .collect(Collectors.groupingBy(b -> b.getOption().getSale()));
-    }
-
-    private void saveOrders(User user, Depot depot, Map<Sale, List<Basket>> groupedBaskets, OrderStatus status) {
-        for (Map.Entry<Sale, List<Basket>> entry : groupedBaskets.entrySet()) {
-            Order order = Order.createOrder(user, status, depot.getAddress());
-            orderRepository.save(order);
-            saveOrderOptions(entry.getValue(), order);
-        }
-    }
-
-    private void saveOrderOptions(List<Basket> baskets, Order order) {
-        for (Basket basket : baskets) {
-            Option option = basket.getOption();
-
-            checkQuantity(option, basket);
-
-            OrderOption orderOption = OrderOption.createOrderOption(option, order, basket);
-            orderOptionRepository.save(orderOption);
-
-            option.decreaseQuantity(basket.getQuantity());
-        }
-    }
-
-    private void checkQuantity(Option option, Basket basket) {
-        if (option.getQuantity() < basket.getQuantity()) {
-            log.error("주문 불가");
-            throw new OutOfStockException();
-        }
     }
 }
