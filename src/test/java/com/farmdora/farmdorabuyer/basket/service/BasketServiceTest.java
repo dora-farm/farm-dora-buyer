@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
 import com.farmdora.farmdorabuyer.basket.dto.BasketResponseDto;
+import com.farmdora.farmdorabuyer.basket.exception.QuantityOverLimitException;
 import com.farmdora.farmdorabuyer.basket.repository.BasketRepository;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
@@ -54,6 +55,7 @@ class BasketServiceTest {
 
         Option mockOption = Option.builder()
                 .name("옵션")
+                .quantity(20)
                 .build();
         when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
 
@@ -89,6 +91,31 @@ class BasketServiceTest {
     }
 
     @Test
+    @DisplayName("장바구니 추가시 존재하지 않는 옵션일 경우 예외 발생")
+    void testAddBasket_QuantityOverLimitException() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        Option mockOption = Option.builder()
+                .name("옵션")
+                .quantity(1)
+                .build();
+        when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
+
+        // when
+        // then
+        BasketRequestDto basketAddRequest = BasketRequestDto.builder()
+                .optionId(1)
+                .quantity(10)
+                .build();
+        assertThatThrownBy(() -> basketService.addBasket(1, basketAddRequest))
+                .isInstanceOf(QuantityOverLimitException.class);
+    }
+
+    @Test
     @DisplayName("장바구니 추가시 이미 존재할 경우 예외 발생")
     void testAddBasket_BasketAlreadyExistsException() {
         // given
@@ -99,6 +126,7 @@ class BasketServiceTest {
 
         Option mockOption = Option.builder()
                 .name("옵션")
+                .quantity(20)
                 .build();
         when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
 

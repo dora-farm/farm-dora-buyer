@@ -9,6 +9,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
 import com.farmdora.farmdorabuyer.basket.dto.BasketResponseDto;
+import com.farmdora.farmdorabuyer.basket.exception.QuantityOverLimitException;
 import com.farmdora.farmdorabuyer.basket.service.BasketService;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
@@ -59,6 +62,8 @@ class BasketControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(ADD_BASKET_SUCCESS.getMessage())));
+
+        verify(basketService, times(1)).addBasket(anyInt(), any(BasketRequestDto.class));
     }
 
     @Test
@@ -79,6 +84,26 @@ class BasketControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status", equalTo(400)))
                 .andExpect(jsonPath("$.message", equalTo("Option 데이터가 존재하지 않습니다 : '1'")));
+    }
+
+    @Test
+    @DisplayName("장바구니 추가시 담은 수량이 재고수를 넘은 경우 에러처리 테스트")
+    void testAddBasket_QuantityOverLimitException() throws Exception {
+        // given
+        doThrow(new QuantityOverLimitException()).when(basketService).addBasket(anyInt(), any(BasketRequestDto.class));
+
+        // when
+        // then
+        BasketRequestDto basketAddRequest = BasketRequestDto.builder()
+                .optionId(1)
+                .quantity(10)
+                .build();
+        mvc.perform(post("/api/basket")
+                        .content(new ObjectMapper().writeValueAsString(basketAddRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", equalTo(400)))
+                .andExpect(jsonPath("$.message", equalTo("옵션의 수량보다 많이 담을 수 없습니다.")));
     }
 
     @Test
