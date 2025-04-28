@@ -130,7 +130,6 @@ public class OrderService {
         return new PageResponseDTO<>(orders, orderResponseList);
     }
 
-    @Transactional
     public boolean cancelOrder(Integer orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("order", orderId));

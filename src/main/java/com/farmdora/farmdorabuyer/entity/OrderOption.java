@@ -38,4 +38,13 @@ public class OrderOption {
     private Integer quantity;
 
     private Integer price;
+
+    public static OrderOption createOrderOption(Option option, Order order, Integer quantity, Integer price) {
+        return OrderOption.builder()
+                .option(option)
+                .order(order)
+                .quantity(quantity)
+                .price(price * quantity)
+                .build();
+    }
 }
