@@ -6,7 +6,6 @@ import com.farmdora.farmdorabuyer.orders.dto.ReviewDTO.*;
 import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.service.ReviewService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,6 @@ import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.REGISTER
 @RestController
 @RequestMapping("/api/my/user")
 @RequiredArgsConstructor
-@Slf4j
 public class ReviewController {
     private final ReviewService reviewService;
     
