@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,7 @@ public class BasketController {
     private final BasketService basketService;
 
     @PostMapping
-    public ResponseEntity<?> addBasket(BasketRequestDto basketRequest) {
+    public ResponseEntity<?> addBasket(@RequestBody BasketRequestDto basketRequest) {
         // TODO Security 구현 완료 후 대체 예정
         Integer userId = 1;
         basketService.addBasket(userId, basketRequest);

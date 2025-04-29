@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.User;
+import com.farmdora.farmdorabuyer.orders.repository.BasketRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
