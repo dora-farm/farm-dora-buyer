@@ -12,7 +12,8 @@ public enum SuccessMessage {
     CANCEL_ORDER_SUCCESS("주문 취소에 성공하였습니다."),
     CREATE_ORDER_SUCCESS("주문에 성공하였습니다."),
     ADD_BASKET_SUCCESS("장바구니 추가에 성공하였습니다."),
-    GET_BASKETS_SUCCESS("장바구니 목록 조회에 성공하였습니다.");
+    GET_BASKETS_SUCCESS("장바구니 목록 조회에 성공하였습니다."),
+    ADD_LIKE_SUCCESS("찜 수정에 성공하였습니다.");
 
     private final String message;
 }
