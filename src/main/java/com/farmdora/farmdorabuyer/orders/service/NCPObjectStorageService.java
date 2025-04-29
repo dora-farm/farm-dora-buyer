@@ -28,6 +28,7 @@ public class NCPObjectStorageService implements StorageService{
     private final String projectId;
 
     private final String defaultOptions = "?type=h&h=192&ttype=png";
+    private final String reviewOptions = "?type=f&w=700&h=700&quality=90&align=4";
 //    private final String defaultOptions = "?type=f_auto&quality=90&ttype=png";
 
     public NCPObjectStorageService(
@@ -140,6 +141,11 @@ public class NCPObjectStorageService implements StorageService{
     public String getObjectStorageImageUrl(String objectName) {
         // 실제 이미지 URL 생성 // ImageOptimizer 사용.
         return String.format("%s%s%s%s", "https://" + cdnDomain + "/", projectId + "/", objectName, defaultOptions);
+    }
+
+    public String getReviewImageUrl(String objectName) {
+        // 실제 이미지 URL 생성 // ImageOptimizer 사용.
+        return String.format("%s%s%s%s", "https://" + cdnDomain + "/", projectId + "/", objectName, reviewOptions);
     }
 
     public void delete(String filePath) {

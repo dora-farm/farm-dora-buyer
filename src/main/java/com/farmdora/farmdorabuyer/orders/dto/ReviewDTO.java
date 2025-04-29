@@ -80,12 +80,12 @@ public class ReviewDTO {
                     .findFirst();
 
             if (mainSaleFile.isPresent()) {
-                productImageUrl = ncpImageService.getObjectStorageImageUrl(mainSaleFile.get().getSaveFile());
+                productImageUrl = ncpImageService.getReviewImageUrl(mainSaleFile.get().getSaveFile());
             }
 
             // 리뷰 이미지 URL 변환
             List<String> imageUrls = reviewFiles.stream()
-                    .map(file -> ncpImageService.getObjectStorageImageUrl(file.getSaveFile()))
+                    .map(file -> ncpImageService.getReviewImageUrl(file.getSaveFile()))
                     .collect(Collectors.toList());
 
             return ReviewResponse.builder()
