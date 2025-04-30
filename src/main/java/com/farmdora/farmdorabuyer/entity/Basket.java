@@ -37,5 +37,9 @@ public class Basket {
 
     @Column(nullable = false)
     private Integer quantity;
+
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 }
 

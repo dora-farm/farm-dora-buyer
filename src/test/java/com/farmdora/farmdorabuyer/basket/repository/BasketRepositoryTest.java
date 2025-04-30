@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.User;
+import com.farmdora.farmdorabuyer.orders.repository.BasketRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -79,5 +80,35 @@ class BasketRepositoryTest {
 
         // then
         assertThat(baskets.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("findByIdAndUser() 쿼리메서드 테스트")
+    void testFindByIdAndUser() {
+        // given
+        User user = new User();
+        em.persist(user);
+
+        Option option = Option.builder()
+                .name("옵션")
+                .build();
+        em.persist(option);
+
+        Basket basket = Basket.builder()
+                .user(user)
+                .option(option)
+                .quantity(2)
+                .build();
+        em.persist(basket);
+
+        em.flush();
+        em.clear();
+
+        // when
+        Optional<Basket> savedBasket = basketRepository.findByIdAndUser(basket.getId(), user);
+
+        // then
+        assertThat(savedBasket.isPresent()).isEqualTo(true);
+        assertThat(savedBasket.get().getQuantity()).isEqualTo(2);
     }
 }
