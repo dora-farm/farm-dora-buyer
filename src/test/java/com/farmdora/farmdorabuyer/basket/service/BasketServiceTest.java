@@ -11,13 +11,14 @@ import static org.mockito.Mockito.when;
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
 import com.farmdora.farmdorabuyer.basket.dto.BasketResponseDto;
 import com.farmdora.farmdorabuyer.basket.exception.QuantityOverLimitException;
-import com.farmdora.farmdorabuyer.basket.repository.BasketRepository;
+import com.farmdora.farmdorabuyer.basket.exception.BasketOverLimitException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.Sale;
 import com.farmdora.farmdorabuyer.entity.User;
+import com.farmdora.farmdorabuyer.orders.repository.BasketRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
 import java.util.List;
@@ -144,6 +145,35 @@ class BasketServiceTest {
                 .build();
         assertThatThrownBy(() -> basketService.addBasket(1, basketAddRequest))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
+    }
+
+    @Test
+    @DisplayName("장바구니 추가시 장바구니 목록이 이미 16개일 경우 예외 발생")
+    void testAddBasket_BasketOverLimitException() {
+        // given
+        User mockUser = User.builder()
+                .userId(1)
+                .build();
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+
+        Option mockOption = Option.builder()
+                .id(1)
+                .quantity(20)
+                .name("옵션")
+                .build();
+        when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
+
+        when(basketRepository.findByUserAndOption(any(User.class), any(Option.class))).thenReturn(Optional.empty());
+        when(basketRepository.countByUser(any(User.class))).thenReturn(16L);
+
+        // when
+        // then
+        BasketRequestDto basketAddRequest = BasketRequestDto.builder()
+                .optionId(1)
+                .quantity(10)
+                .build();
+        assertThatThrownBy(() -> basketService.addBasket(1, basketAddRequest))
+                .isInstanceOf(BasketOverLimitException.class);
     }
 
     @Test

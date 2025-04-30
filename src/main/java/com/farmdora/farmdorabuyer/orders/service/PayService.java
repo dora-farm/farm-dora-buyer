@@ -28,8 +28,7 @@ public class PayService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("order", orderId));
 
-        Pay pay = payRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("pay", orderId));
+        Pay pay = payRepository.findByOrderId(orderId);
 
         // 주문에 포함된 모든 주문 옵션 조회
         List<OrderOption> orderOptions = orderOptionRepository.findByOrder(order);

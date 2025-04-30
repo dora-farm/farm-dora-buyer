@@ -45,8 +45,10 @@ public class OrderPayDetailDTO {
         private String payStatus;
         private String payMethod;
         private Integer amount;
-        private String payNum;
+        private String bankName;
         private String card;
+        private String accountNum;
+        private String payNum;
         private String cardNumber;
 
         public static PayDetailDTO fromEntity(Pay pay) {
@@ -55,8 +57,10 @@ public class OrderPayDetailDTO {
                     .payStatus(pay.getStatus() != null ? pay.getStatus().getName() : null)
                     .payMethod(pay.getMethod())
                     .amount(pay.getAmount())
-                    .payNum(pay.getPayNum())
+                    .bankName(pay.getBankName())
                     .card(pay.getCard())
+                    .accountNum(pay.getAccountNum())
+                    .payNum(pay.getPayNum())
                     .cardNumber(pay.getCardNumber())
                     .build();
         }
