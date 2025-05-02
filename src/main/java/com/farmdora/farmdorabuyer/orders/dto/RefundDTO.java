@@ -1,7 +1,7 @@
 package com.farmdora.farmdorabuyer.orders.dto;
 
 import com.farmdora.farmdorabuyer.entity.*;
-import com.farmdora.farmdorabuyer.orders.service.NcpImageService;
+import com.farmdora.farmdorabuyer.orders.service.NCPObjectStorageService;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -42,9 +42,9 @@ public class RefundDTO {
         public static RefundResponse fromEntity(Refund refund, List<RefundFile> refundFiles,
                                                 List<OrderOption> orderOptions,
                                                 Sale sale, SaleFile mainImage,
-                                                NcpImageService ncpImageService) {
+                                                NCPObjectStorageService ncpImageService) {
             List<String> imageUrls = refundFiles.stream()
-                    .map(file -> ncpImageService.getObjectUrl(file.getSaveFile()))
+                    .map(file -> ncpImageService.getObjectStorageImageUrl (file.getSaveFile()))
                     .collect(Collectors.toList());
 
             List<OrderOptionInfo> optionInfos = orderOptions.stream()

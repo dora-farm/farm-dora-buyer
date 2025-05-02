@@ -10,11 +10,11 @@ ncp:
   object-storage:
     endpoint: https://kr.object.ncloudstorage.com
     region: kr-standard
-    bucket: farmdora
+    bucket: bitcamp-68
 
   image-optimizer:
-    project-id: Gv9VppsiR9
-    cdn-domain: aacblnby9780.edge.naverncp.com
+    project-id: O8XfcLSSm6
+    cdn-domain: zcbg41sa9729.edge.naverncp.com
 
-  access-key: ncp_iam_BPASKR5nKujGrW7C2yV5
-  secret-key: ncp_iam_BPKSKRPXwNzYCHv9zMJfroeR2XA8e47gQv
+  access-key: ENC(h5+OKxEsP1RHEaoQJABFNTMXE9amleET4Vhprr7SCAUckb+euFrFEQ==)
+  secret-key: ENC(l9Q/rUdMAA7i3iTgzZpclwNjx+ysbs5WPTZst6XNbg+BvKuzPzwpM8LZjVfaqr+1by24jGXYSBc=)

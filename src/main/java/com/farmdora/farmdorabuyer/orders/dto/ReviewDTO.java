@@ -1,11 +1,12 @@
 package com.farmdora.farmdorabuyer.orders.dto;
 
 import com.farmdora.farmdorabuyer.entity.*;
-import com.farmdora.farmdorabuyer.orders.service.NcpImageService;
+import com.farmdora.farmdorabuyer.orders.service.NCPObjectStorageService;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ReviewDTO {
@@ -63,33 +64,40 @@ public class ReviewDTO {
         private LocalDateTime createdDate;
         private List<String> imageUrls;
         private List<String> removedImageUrls;
-        private List<OrderOptionInfo> orderOptions; // 주문 옵션 정보 추가
+        private List<OrderOptionInfo> orderOptions;
 
         // Review 엔티티를 ReviewResponse DTO로 변환하는 정적 메서드
         public static ReviewResponse fromEntity(Review review, List<ReviewFile> reviewFiles,
-                                                List<OrderOptionInfo> orderOptions, NcpImageService ncpImageService) {
+                                                List<OrderOptionInfo> orderOptions, NCPObjectStorageService ncpImageService,
+                                                List<SaleFile> saleFiles) {
             Sale sale = review.getSale();
 
-            // 파일명을 전체 URL로 변환
-            List<String> imageUrls = reviewFiles.stream()
-                    .map(file -> ncpImageService.getObjectUrl(file.getSaveFile()))
-                    .collect(Collectors.toList());
+            String productImageUrl = "";
 
-            // 리뷰의 saleId와 동일한 옵션만 필터링
-            List<OrderOptionInfo> filteredOrderOptions = orderOptions.stream()
-                    .filter(option -> option.getSaleId().equals(sale.getId()))
+            // 해당 sale_id에 맞는 SaleFile 중 isMain=true인 파일 찾기
+            Optional<SaleFile> mainSaleFile = saleFiles.stream()
+                    .filter(file -> file.isMain())
+                    .findFirst();
+
+            if (mainSaleFile.isPresent()) {
+                productImageUrl = ncpImageService.getReviewImageUrl(mainSaleFile.get().getSaveFile());
+            }
+
+            // 리뷰 이미지 URL 변환
+            List<String> imageUrls = reviewFiles.stream()
+                    .map(file -> ncpImageService.getReviewImageUrl(file.getSaveFile()))
                     .collect(Collectors.toList());
 
             return ReviewResponse.builder()
                     .reviewId(review.getId())
                     .saleId(sale.getId())
                     .productName(sale.getTitle())
-                    .productImage(sale.getSeller().getSaveFile())
+                    .productImage(productImageUrl)
                     .content(review.getContent())
                     .score(review.getScore())
                     .createdDate(review.getCreatedDate())
                     .imageUrls(imageUrls)
-                    .orderOptions(filteredOrderOptions)
+                    .orderOptions(orderOptions)
                     .build();
         }
     }
