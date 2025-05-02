@@ -33,4 +33,8 @@ public class Option {
     private int quantity;
 
     private boolean isStop;
+
+    public void decreaseQuantity(int quantity) {
+        this.quantity -= quantity;
+    }
 }
