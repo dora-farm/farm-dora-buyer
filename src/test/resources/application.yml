@@ -11,6 +11,10 @@ ncp:
     region: kr-standard
     bucket: farmdora
 
+  image:
+    path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
+    type: ?type=h&h=192&ttype=png
+
   image-optimizer:
     project-id: Gv9VppsiR9
     cdn-domain: aacblnby9780.edge.naverncp.com
