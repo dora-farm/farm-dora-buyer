@@ -44,7 +44,7 @@ class PurchaseControllerTest extends ControllerTest {
             // then
             mvc.perform(post(URL)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(orderRequest)))
+                            .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
                     .andExpect(jsonPath("$.message", equalTo(CREATE_ORDER_SUCCESS.getMessage())));
@@ -60,7 +60,7 @@ class PurchaseControllerTest extends ControllerTest {
             // then
             mvc.perform(post(URL)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(orderRequest)))
+                            .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("User 데이터가 존재하지 않습니다 : '1'")));
@@ -76,7 +76,7 @@ class PurchaseControllerTest extends ControllerTest {
             // then
             mvc.perform(post(URL)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(orderRequest)))
+                            .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("Depot 데이터가 존재하지 않습니다 : '1'")));
@@ -92,7 +92,7 @@ class PurchaseControllerTest extends ControllerTest {
             // then
             mvc.perform(post(URL)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(orderRequest)))
+                            .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("사용자의 배송지가 아닙니다.")));
@@ -108,7 +108,7 @@ class PurchaseControllerTest extends ControllerTest {
             // then
             mvc.perform(post(URL)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(orderRequest)))
+                            .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("OrderStatus 데이터가 존재하지 않습니다 : '1'")));
@@ -124,7 +124,7 @@ class PurchaseControllerTest extends ControllerTest {
             // then
             mvc.perform(post(URL)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(orderRequest)))
+                            .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("재고가 없습니다.")));
