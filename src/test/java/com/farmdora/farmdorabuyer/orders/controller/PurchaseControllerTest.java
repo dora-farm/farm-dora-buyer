@@ -10,30 +10,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.farmdora.farmdorabuyer.ControllerTest;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
 import com.farmdora.farmdorabuyer.orders.exception.NotUserOfDepotException;
 import com.farmdora.farmdorabuyer.orders.exception.OutOfStockException;
-import com.farmdora.farmdorabuyer.orders.service.PurchaseService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = PurchaseController.class)
-class PurchaseControllerTest {
-
-    @MockitoBean
-    private PurchaseService purchaseService;
-
-    @Autowired
-    private MockMvc mvc;
+class PurchaseControllerTest extends ControllerTest {
 
     @Nested
     @DisplayName("장바구니 목록으로 주문 API 테스트")
