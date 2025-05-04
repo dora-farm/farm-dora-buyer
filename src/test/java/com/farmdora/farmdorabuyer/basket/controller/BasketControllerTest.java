@@ -7,6 +7,7 @@ import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.UPDATE_B
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -19,36 +20,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.farmdora.farmdorabuyer.ControllerTest;
 import com.farmdora.farmdorabuyer.basket.dto.BasketRequestDto;
 import com.farmdora.farmdorabuyer.basket.dto.BasketResponseDto;
-import com.farmdora.farmdorabuyer.basket.exception.QuantityOverLimitException;
 import com.farmdora.farmdorabuyer.basket.exception.BasketOverLimitException;
-import com.farmdora.farmdorabuyer.basket.service.BasketService;
+import com.farmdora.farmdorabuyer.basket.exception.QuantityOverLimitException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
+import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = BasketController.class)
-class BasketControllerTest {
-
-    @MockitoBean
-    private BasketService basketService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MockMvc mvc;
+class BasketControllerTest extends ControllerTest {
 
     @Nested
     @DisplayName("장바구니 추가 API 테스트")
@@ -166,7 +155,10 @@ class BasketControllerTest {
                             .price(2000)
                             .build()
             );
-            when(basketService.getBaskets(anyInt())).thenReturn(baskets);
+            PageResponseDTO<BasketResponseDto> pageResponse = new PageResponseDTO<>();
+            pageResponse.setContents(baskets);
+            pageResponse.setTotalElements(2);
+            when(basketService.getBaskets(anyInt(), any(Pageable.class))).thenReturn(pageResponse);
 
             // when
             // then
@@ -174,7 +166,7 @@ class BasketControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
                     .andExpect(jsonPath("$.message", equalTo(GET_BASKETS_SUCCESS.getMessage())))
-                    .andExpect(jsonPath("$.data.size()", equalTo(2)));
+                    .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
         }
     }
 
@@ -182,15 +174,19 @@ class BasketControllerTest {
     @DisplayName("사용자의 장바구니 삭제 API 테스트")
     class RemoveBasketsTest {
 
+        private static final List<Integer> basketIds = List.of(1, 2, 3, 4);
+
         @Test
         @DisplayName("사용자의 장바구니 삭제 성공")
         void testRemoveBasket() throws Exception {
             // given
-            doNothing().when(basketService).removeBasket(anyInt(), anyInt());
+            doNothing().when(basketService).removeBaskets(anyInt(), anyList());
 
             // when
             // then
-            mvc.perform(delete("/api/basket/{basketId}", 1))
+            mvc.perform(delete("/api/basket")
+                            .content(objectMapper.writeValueAsString(basketIds))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
                     .andExpect(jsonPath("$.message", equalTo(REMOVE_BASKET_SUCCESS.getMessage())));
@@ -200,11 +196,13 @@ class BasketControllerTest {
         @DisplayName("사용자의 장바구니 삭제시 장바구니가 없을 경우 에러처리 테스트")
         void testRemoveBasket_ResourceNotFoundException() throws Exception {
             // given
-            doThrow(new ResourceNotFoundException("Basket", 1)).when(basketService).removeBasket(anyInt(), anyInt());
+            doThrow(new ResourceNotFoundException("Basket", 1)).when(basketService).removeBaskets(anyInt(), anyList());
 
             // when
             // then
-            mvc.perform(delete("/api/basket/{basketId}", 1))
+            mvc.perform(delete("/api/basket")
+                            .content(objectMapper.writeValueAsString(basketIds))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("Basket 데이터가 존재하지 않습니다 : '1'")));
