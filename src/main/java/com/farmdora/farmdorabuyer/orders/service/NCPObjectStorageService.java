@@ -1,13 +1,11 @@
 package com.farmdora.farmdorabuyer.orders.service;
 
-import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
-import com.farmdora.farmdorabuyer.common.exception.FileException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,7 +18,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-public class NCPObjectStorageService implements StorageService{
+public class NCPObjectStorageService {
 
     private final AmazonS3 s3;
     private final String bucketName;
@@ -53,7 +51,7 @@ public class NCPObjectStorageService implements StorageService{
 
     }
 
-    @Override
+//    @Override
     public void upload(String filePath, InputStream fileIn) {
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -74,7 +72,7 @@ public class NCPObjectStorageService implements StorageService{
         }
     }
 
-    @Override
+//    @Override
     public void download(String filePath, OutputStream fileOut) {
         try {
             S3Object s3Object = s3.getObject(bucketName, filePath);
