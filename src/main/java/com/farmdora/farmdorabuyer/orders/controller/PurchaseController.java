@@ -6,6 +6,7 @@ import com.farmdora.farmdorabuyer.common.response.HttpResponse;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromOptionDTO;
 import com.farmdora.farmdorabuyer.orders.service.PurchaseService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +22,16 @@ public class PurchaseController {
     private final PurchaseService purchaseService;
 
     @PostMapping("/basket")
-    public ResponseEntity<?> order(@RequestBody OrderFromBasketDTO orderRequest) {
-        Integer userId = 1;
+    public ResponseEntity<?> order(Principal principal, @RequestBody OrderFromBasketDTO orderRequest) {
+        Integer userId = Integer.parseInt(principal.getName());
         purchaseService.orderFromBaskets(userId, orderRequest);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, CREATE_ORDER_SUCCESS.getMessage(), null));
     }
 
     @PostMapping("/option")
-    public ResponseEntity<?> order(@RequestBody OrderFromOptionDTO orderRequest) {
-        Integer userId = 1;
+    public ResponseEntity<?> order(Principal principal, @RequestBody OrderFromOptionDTO orderRequest) {
+        Integer userId = Integer.parseInt(principal.getName());
         purchaseService.orderFromOption(userId, orderRequest);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, CREATE_ORDER_SUCCESS.getMessage(), null));

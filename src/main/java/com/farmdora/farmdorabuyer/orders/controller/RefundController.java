@@ -3,6 +3,7 @@ package com.farmdora.farmdorabuyer.orders.controller;
 import com.farmdora.farmdorabuyer.common.response.HttpResponse;
 import com.farmdora.farmdorabuyer.orders.dto.RefundDTO.*;
 import com.farmdora.farmdorabuyer.orders.service.RefundService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,11 +25,11 @@ public class RefundController {
     private final RefundService refundService;
 
     @PostMapping("/order/refund")
-    public ResponseEntity<?> createRefund(
-            RefundRequest request,
-            @RequestParam(value = "images", required = false) MultipartFile[] images) throws IOException {
+    public ResponseEntity<?> createRefund(Principal principal,
+                                          RefundRequest request,
+                                          @RequestParam(value = "images", required = false) MultipartFile[] images) throws IOException {
 
-        Integer userId = 1;
+        Integer userId = Integer.parseInt(principal.getName());
 
         List<MultipartFile> imageList = images != null ? Arrays.asList(images) : new ArrayList<>();
         RefundResponse response = refundService.createRefund(userId, request, imageList);

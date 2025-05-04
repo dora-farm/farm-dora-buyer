@@ -4,6 +4,7 @@ import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.ADD_LIKE
 
 import com.farmdora.farmdorabuyer.common.response.HttpResponse;
 import com.farmdora.farmdorabuyer.like.service.LikeService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,8 @@ public class LikeController {
     private final LikeService likeService;
 
     @PutMapping("/{saleId}")
-    public ResponseEntity<?> addLike(@PathVariable("saleId") Integer saleId) {
-        // TODO Security 구현완료후 수정 예정
-        Integer userId = 1;
+    public ResponseEntity<?> addLike(Principal principal, @PathVariable("saleId") Integer saleId) {
+        Integer userId = Integer.parseInt(principal.getName());
         likeService.updateLike(userId, saleId);
         return ResponseEntity.ok().body(new HttpResponse(HttpStatus.OK, ADD_LIKE_SUCCESS.getMessage(), null));
     }
