@@ -12,6 +12,10 @@ ncp:
     region: kr-standard
     bucket: bitcamp-68
 
+  image:
+    path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
+    type: ?type=h&h=192&ttype=png
+
   image-optimizer:
     project-id: O8XfcLSSm6
     cdn-domain: zcbg41sa9729.edge.naverncp.com
