@@ -430,6 +430,13 @@ class PurchaseServiceTest {
                     .build();
             when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.of(mockOrderStatus));
 
+            Option mockOption = Option.builder()
+                    .id(1)
+                    .price(10000)
+                    .quantity(10)
+                    .build();
+            when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
+
             // when
             // then
             OrderFromOptionDTO orderRequest = OrderFromOptionDTO.builder()

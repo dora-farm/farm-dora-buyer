@@ -10,22 +10,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.farmdora.farmdorabuyer.like.service.LikeService;
+import com.farmdora.farmdorabuyer.ControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(LikeController.class)
-class LikeControllerTest {
-
-    @MockitoBean
-    private LikeService likeService;
-
-    @Autowired
-    private MockMvc mvc;
+class LikeControllerTest extends ControllerTest {
 
     @Test
     @DisplayName("찜 추가/삭제 API 테스트")

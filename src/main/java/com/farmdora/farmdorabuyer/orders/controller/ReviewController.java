@@ -5,6 +5,7 @@ import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.ReviewDTO.*;
 import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.service.ReviewService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -38,10 +39,10 @@ public class ReviewController {
     }
   
     @GetMapping("/order/myreviews")
-    public ResponseEntity<?> getMyReviews(
-            @ModelAttribute SearchDTO searchDTO,
-            @PageableDefault(size = 5) Pageable pageable) {
-        Integer userId = 1;
+    public ResponseEntity<?> getMyReviews(Principal principal,
+                                          @ModelAttribute SearchDTO searchDTO,
+                                          @PageableDefault(size = 5) Pageable pageable) {
+        Integer userId = Integer.parseInt(principal.getName());
         PageResponseDTO<ReviewResponse> pageResponse = reviewService.getMyReviews(userId, searchDTO, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, "리뷰를 성공적으로 조회했습니다.", pageResponse));

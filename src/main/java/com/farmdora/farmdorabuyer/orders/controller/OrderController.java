@@ -8,6 +8,7 @@ import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.service.OrderService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -28,13 +29,10 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping("/order")
-    public ResponseEntity<?> getOrderList(
-            @ModelAttribute SearchDTO SearchDTO,
-            @PageableDefault(size = 5)Pageable pageable) {
-        //jwt 사용시
-        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Integer userId = ((UserDetails) authentication.getPrincipal()).getUserId();
-        int userId = 1;
+    public ResponseEntity<?> getOrderList(Principal principal,
+                                          @ModelAttribute SearchDTO SearchDTO,
+                                          @PageableDefault(size = 5) Pageable pageable) {
+        Integer userId = Integer.parseInt(principal.getName());
         PageResponseDTO<OrderResponseDTO> result = orderService.getOrderList(userId, SearchDTO, pageable);
 
         return ResponseEntity.ok()
