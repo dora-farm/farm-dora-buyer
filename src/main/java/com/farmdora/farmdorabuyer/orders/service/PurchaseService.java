@@ -20,6 +20,7 @@ import com.farmdora.farmdorabuyer.orders.repository.OrderOptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderStatusRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +41,8 @@ public class PurchaseService {
     private final OrderRepository orderRepository;
     private final OrderOptionRepository orderOptionRepository;
     private final OptionRepository optionRepository;
+
+    private final EntityManager em;
 
     public void orderFromBaskets(Integer userId, OrderFromBasketDTO orderRequest) {
         User user = userRepository.findById(userId)
@@ -82,7 +85,12 @@ public class PurchaseService {
 
     private void saveOrderOptions(List<Basket> baskets, Order order) {
         for (Basket basket : baskets) {
-            Option option = basket.getOption();
+            Integer optionId = basket.getOption().getId();
+
+            em.clear();
+
+            Option option = optionRepository.findByIdForUpdate(optionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Option", optionId));
 
             checkQuantity(option, basket.getQuantity());
 
@@ -114,7 +122,7 @@ public class PurchaseService {
         Order order = Order.createOrder(user, status, depot.getAddress());
         orderRepository.save(order);
 
-        Option option = optionRepository.findById(orderRequest.getOptionId())
+        Option option = optionRepository.findByIdForUpdate(orderRequest.getOptionId())
                 .orElseThrow(() -> new ResourceNotFoundException("Option", orderRequest.getOptionId()));
         checkQuantity(option, orderRequest.getQuantity());
         option.decreaseQuantity(orderRequest.getQuantity());
