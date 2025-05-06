@@ -6,6 +6,8 @@ import com.farmdora.farmdorabuyer.like.controller.LikeController;
 import com.farmdora.farmdorabuyer.like.service.LikeService;
 import com.farmdora.farmdorabuyer.orders.controller.PurchaseController;
 import com.farmdora.farmdorabuyer.orders.service.PurchaseService;
+import com.farmdora.farmdorabuyer.popup.controller.PopupController;
+import com.farmdora.farmdorabuyer.popup.service.PopupService;
 import com.farmdora.farmdorabuyer.security.TestSecurityConfig;
 import com.farmdora.farmdorabuyer.security.WithCustomMockUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = {
     BasketController.class,
     LikeController.class,
-    PurchaseController.class
+    PurchaseController.class,
+    PopupController.class
 })
 @WithCustomMockUser
 @Import({TestSecurityConfig.class})
@@ -38,5 +41,8 @@ public abstract class ControllerTest {
 
     @MockitoBean
     protected PurchaseService purchaseService;
+
+    @MockitoBean
+    protected PopupService popupService;
 
 }

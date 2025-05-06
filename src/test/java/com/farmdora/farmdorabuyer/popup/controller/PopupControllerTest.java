@@ -6,25 +6,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.farmdora.farmdorabuyer.ControllerTest;
 import com.farmdora.farmdorabuyer.common.response.SuccessMessage;
 import com.farmdora.farmdorabuyer.popup.dto.PopupDTO;
-import com.farmdora.farmdorabuyer.popup.service.PopupService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = PopupController.class)
-class PopupControllerTest {
-
-    @MockitoBean
-    private PopupService popupService;
-
-    @Autowired
-    private MockMvc mvc;
+class PopupControllerTest extends ControllerTest {
 
     @Test
     @DisplayName("팝업 목록 조회 ")
