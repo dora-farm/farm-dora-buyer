@@ -32,6 +32,7 @@ public interface BasketRepository extends JpaRepository<Basket, Integer> {
             s.id,
             s.title,
             o.name,
+            o.quantity,
             b.quantity,
             o.price,
             sf.saveFile
