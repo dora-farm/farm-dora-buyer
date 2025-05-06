@@ -18,6 +18,7 @@ public class BasketResponseDto {
     private Integer saleId;
     private String title;
     private String option;
+    private Integer stock;
     private Integer quantity;
     private Integer price;
     private String imageUrl;
