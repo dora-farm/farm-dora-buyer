@@ -4,7 +4,9 @@ spring:
     url: ENC(6oGONiPCWIUx52hvMAL3raMSI4RbFPACyW/VM+Bto0LGyxcs4EsJY6wnxqGHuI12LRABZovKxxOIoZK8DWclXdN46jLnzb3lMM0Mz9DGmIHR7q1lSHgO+WGMpgD3/s3isHhvEiE0qjPyGDY0pWc74/4ZdYQPg6Bm)
     username: ENC(urT4wb+lNEUDjKaJRGqSl7/imFQ2IBbx)
     password: ENC(wcEiMtZdcspXjQt3JXr6kus48hFneUJZ)
-
+    hikari:
+      max-lifetime: 580000
+      
   data:
     redis:
       host: ENC(VFdUc/6tLyxg23xcLaVduyy/WRypzmZy)
