@@ -7,6 +7,8 @@ import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.Order;
 import com.farmdora.farmdorabuyer.entity.OrderOption;
 import com.farmdora.farmdorabuyer.entity.OrderStatus;
+import com.farmdora.farmdorabuyer.entity.Pay;
+import com.farmdora.farmdorabuyer.entity.PayStatus;
 import com.farmdora.farmdorabuyer.entity.Sale;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
@@ -19,10 +21,13 @@ import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderOptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderStatusRepository;
+import com.farmdora.farmdorabuyer.orders.repository.PayRepository;
+import com.farmdora.farmdorabuyer.orders.repository.PayStatusRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +46,13 @@ public class PurchaseService {
     private final OrderRepository orderRepository;
     private final OrderOptionRepository orderOptionRepository;
     private final OptionRepository optionRepository;
+    private final PayRepository payRepository;
+    private final PayStatusRepository payStatusRepository;
 
     private final EntityManager em;
 
     public void orderFromBaskets(Integer userId, OrderFromBasketDTO orderRequest) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUserIdWithBankType(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         Depot depot = depotRepository.findById(orderRequest.getDepotId())
@@ -59,8 +66,6 @@ public class PurchaseService {
                 .orElseThrow(() -> new ResourceNotFoundException("OrderStatus", "배송준비"));
 
         saveOrders(user, depot, groupedBaskets, status);
-
-        // TODO Pay 진행
     }
 
     private void checkDepotOfUser(Depot depot, User user) {
@@ -79,11 +84,32 @@ public class PurchaseService {
         for (Map.Entry<Sale, List<Basket>> entry : groupedBaskets.entrySet()) {
             Order order = Order.createOrder(user, status, depot.getAddress());
             orderRepository.save(order);
-            saveOrderOptions(entry.getValue(), order);
+
+            int purchaseAmount = saveOrderOptions(entry.getValue(), order);
+            savePay(user, order, purchaseAmount);
         }
     }
 
-    private void saveOrderOptions(List<Basket> baskets, Order order) {
+    private void savePay(User user, Order order, int purchaseAmount) {
+        PayStatus status = payStatusRepository.findByName("결제완료")
+                .orElseThrow(() -> new ResourceNotFoundException("PayStatus", "결제완료"));
+
+        Pay pay = Pay.builder()
+                .order(order)
+                .status(status)
+                .method("카드")
+                .amount(purchaseAmount)
+                .payNum(UUID.randomUUID().toString().substring(0, 10))
+                .card(user.getBankType().getName())
+                .cardNumber("0130924-23094")
+                .accountNum(user.getAccountNum())
+                .bankName(user.getBankType().getName())
+                .build();
+        payRepository.save(pay);
+    }
+
+    private int saveOrderOptions(List<Basket> baskets, Order order) {
+        int purchaseAmount = 0;
         for (Basket basket : baskets) {
             Integer optionId = basket.getOption().getId();
 
@@ -97,8 +123,11 @@ public class PurchaseService {
             OrderOption orderOption = OrderOption.createOrderOption(option, order, basket.getQuantity(), option.getPrice());
             orderOptionRepository.save(orderOption);
 
+            purchaseAmount += orderOption.getPrice();
+
             option.decreaseQuantity(basket.getQuantity());
         }
+        return purchaseAmount;
     }
 
     private void checkQuantity(Option option, Integer quantity) {
