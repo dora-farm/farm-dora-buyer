@@ -55,7 +55,7 @@ class BasketServiceTest {
     class AddBasketTests {
 
         @Test
-        @DisplayName("장바구니 추가 서비스 레이어 테스트")
+        @DisplayName("장바구니 추가 성공")
         void testAddBasket() {
             // given
             User mockUser = User.builder()

@@ -31,6 +31,7 @@ import com.farmdora.farmdorabuyer.orders.repository.OrderOptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderStatusRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -65,6 +66,9 @@ class PurchaseServiceTest {
     @Mock
     private OptionRepository optionRepository;
 
+    @Mock
+    private EntityManager em;
+
     @InjectMocks
     private PurchaseService purchaseService;
 
@@ -94,26 +98,30 @@ class PurchaseServiceTest {
             when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
 
             Sale mockSale1 = new Sale();
+            Option mockOption1 = Option.builder()
+                    .id(1)
+                    .quantity(10)
+                    .sale(mockSale1)
+                    .price(10000)
+                    .build();
             Sale mockSale2 = new Sale();
+            Option mockOption2 = Option.builder()
+                    .id(2)
+                    .quantity(10)
+                    .sale(mockSale2)
+                    .price(20000)
+                    .build();
             List<Basket> baskets = List.of(
                     Basket.builder()
                             .id(1)
                             .user(mockUser)
-                            .option(Option.builder()
-                                    .quantity(10)
-                                    .sale(mockSale1)
-                                    .price(10000)
-                                    .build())
+                            .option(mockOption1)
                             .quantity(3)
                             .build(),
                     Basket.builder()
                             .id(2)
                             .user(mockUser)
-                            .option(Option.builder()
-                                    .quantity(10)
-                                    .sale(mockSale2)
-                                    .price(20000)
-                                    .build())
+                            .option(mockOption2)
                             .quantity(5)
                             .build()
             );
@@ -123,6 +131,9 @@ class PurchaseServiceTest {
                     .name("배송준비")
                     .build();
             when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.of(mockOrderStatus));
+
+            when(optionRepository.findByIdForUpdate(1)).thenReturn(Optional.of(mockOption1));
+            when(optionRepository.findByIdForUpdate(2)).thenReturn(Optional.of(mockOption2));
 
             // when
             purchaseService.orderFromBaskets(1, orderRequest);
@@ -251,26 +262,30 @@ class PurchaseServiceTest {
             when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
 
             Sale mockSale1 = new Sale();
+            Option mockOption1 = Option.builder()
+                    .id(1)
+                    .quantity(1)
+                    .sale(mockSale1)
+                    .price(10000)
+                    .build();
             Sale mockSale2 = new Sale();
+            Option mockOption2 = Option.builder()
+                    .id(2)
+                    .quantity(10)
+                    .sale(mockSale2)
+                    .price(20000)
+                    .build();
             List<Basket> baskets = List.of(
                     Basket.builder()
                             .id(1)
                             .user(mockUser)
-                            .option(Option.builder()
-                                    .quantity(10)
-                                    .sale(mockSale1)
-                                    .price(10000)
-                                    .build())
-                            .quantity(20)
+                            .option(mockOption1)
+                            .quantity(3)
                             .build(),
                     Basket.builder()
                             .id(2)
                             .user(mockUser)
-                            .option(Option.builder()
-                                    .quantity(10)
-                                    .sale(mockSale2)
-                                    .price(20000)
-                                    .build())
+                            .option(mockOption2)
                             .quantity(5)
                             .build()
             );
@@ -280,6 +295,8 @@ class PurchaseServiceTest {
                     .name("배송준비")
                     .build();
             when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.of(mockOrderStatus));
+
+            when(optionRepository.findByIdForUpdate(anyInt())).thenReturn(Optional.of(mockOption1));
 
             // when
             // then
@@ -324,7 +341,7 @@ class PurchaseServiceTest {
                     .price(10000)
                     .quantity(10)
                     .build();
-            when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
+            when(optionRepository.findByIdForUpdate(anyInt())).thenReturn(Optional.of(mockOption));
 
             // when
             purchaseService.orderFromOption(1, orderRequest);
@@ -435,7 +452,7 @@ class PurchaseServiceTest {
                     .price(10000)
                     .quantity(10)
                     .build();
-            when(optionRepository.findById(anyInt())).thenReturn(Optional.of(mockOption));
+            when(optionRepository.findByIdForUpdate(anyInt())).thenReturn(Optional.of(mockOption));
 
             // when
             // then
