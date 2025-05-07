@@ -1,3 +1,6 @@
+api:
+  prefix: /api/buyer
+
 server:
   port: 8020
 

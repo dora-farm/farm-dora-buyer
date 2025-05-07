@@ -22,7 +22,7 @@ import java.util.List;
 import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.REGISTER_REVIEW_SUCCESS;
 
 @RestController
-@RequestMapping("/api/my/user")
+@RequestMapping("${api.prefix}/my/user")
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;

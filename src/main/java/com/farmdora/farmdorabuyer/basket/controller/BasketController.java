@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/basket")
+@RequestMapping("${api.prefix}/basket")
 @RequiredArgsConstructor
 public class BasketController {
 

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.farmdora.farmdorabuyer.common.response.SuccessMessage.SEARCH_ORDER_PAY_SUCCESS;
 
 @RestController
-@RequestMapping("/api/my/user")
+@RequestMapping("${api.prefix}/my/user")
 @RequiredArgsConstructor
 public class PayController {
 

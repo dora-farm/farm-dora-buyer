@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/my/user")
+@RequestMapping("${api.prefix}/my/user")
 @RequiredArgsConstructor
 @Slf4j
 public class RefundController {
