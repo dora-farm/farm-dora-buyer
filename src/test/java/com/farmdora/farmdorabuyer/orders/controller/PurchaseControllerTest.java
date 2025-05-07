@@ -23,11 +23,13 @@ import org.springframework.http.MediaType;
 
 class PurchaseControllerTest extends ControllerTest {
 
+    private static final String BASE_URL = "/api/buyer";
+
     @Nested
     @DisplayName("장바구니 목록으로 주문 API 테스트")
     class OrderFromBasketsTests {
 
-        private static final String URL = "/api/order/basket";
+        private static final String ORDER_BASKET_URL = BASE_URL + "/order/basket";
 
         private static final OrderFromBasketDTO orderRequest = OrderFromBasketDTO.builder()
                 .basketIds(List.of(1, 2))
@@ -42,7 +44,7 @@ class PurchaseControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post(URL)
+            mvc.perform(post(ORDER_BASKET_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isOk())
@@ -58,7 +60,7 @@ class PurchaseControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post(URL)
+            mvc.perform(post(ORDER_BASKET_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
@@ -74,7 +76,7 @@ class PurchaseControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post(URL)
+            mvc.perform(post(ORDER_BASKET_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
@@ -90,7 +92,7 @@ class PurchaseControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post(URL)
+            mvc.perform(post(ORDER_BASKET_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
@@ -106,7 +108,7 @@ class PurchaseControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post(URL)
+            mvc.perform(post(ORDER_BASKET_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())
@@ -122,7 +124,7 @@ class PurchaseControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post(URL)
+            mvc.perform(post(ORDER_BASKET_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(orderRequest)))
                     .andExpect(status().isBadRequest())

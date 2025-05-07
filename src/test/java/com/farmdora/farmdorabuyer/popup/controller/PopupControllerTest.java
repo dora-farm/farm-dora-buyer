@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 
 class PopupControllerTest extends ControllerTest {
 
+    private static final String BASE_URL = "/api/buyer/popup";
+
     @Test
     @DisplayName("팝업 목록 조회 ")
     void testGetPopups() throws Exception {
@@ -33,7 +35,7 @@ class PopupControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/api/popup"))
+        mvc.perform(get(BASE_URL))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(SuccessMessage.GET_POPUPS_SUCCESS.getMessage())));

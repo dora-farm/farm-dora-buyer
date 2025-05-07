@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 
 class LikeControllerTest extends ControllerTest {
 
+    private static final String BASE_URL = "/api/buyer/like/{saleId}";
+
     @Test
     @DisplayName("찜 추가/삭제 API 테스트")
     void testUpdateLike() throws Exception {
@@ -24,7 +26,7 @@ class LikeControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(put("/api/like/{saleId}", 1))
+        mvc.perform(put(BASE_URL, 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(ADD_LIKE_SUCCESS.getMessage())));

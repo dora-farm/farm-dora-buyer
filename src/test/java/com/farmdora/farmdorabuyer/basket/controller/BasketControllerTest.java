@@ -39,9 +39,13 @@ import org.springframework.http.MediaType;
 
 class BasketControllerTest extends ControllerTest {
 
+    private static final String BASE_URL = "/api/buyer";
+
     @Nested
     @DisplayName("장바구니 추가 API 테스트")
     class AddBasketTests {
+
+        private static final String ADD_BASKET_URL = BASE_URL + "/basket";
 
         private BasketRequestDto basketAddRequest = BasketRequestDto.builder()
                     .optionId(1)
@@ -56,7 +60,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post("/api/basket")
+            mvc.perform(post(ADD_BASKET_URL)
                             .content(objectMapper.writeValueAsString(basketAddRequest))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
@@ -74,7 +78,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post("/api/basket")
+            mvc.perform(post(ADD_BASKET_URL)
                             .content(new ObjectMapper().writeValueAsString(basketAddRequest))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
@@ -90,7 +94,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post("/api/basket")
+            mvc.perform(post(ADD_BASKET_URL)
                             .content(objectMapper.writeValueAsString(basketAddRequest))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
@@ -106,7 +110,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post("/api/basket")
+            mvc.perform(post(ADD_BASKET_URL)
                             .content(objectMapper.writeValueAsString(basketAddRequest))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
@@ -122,7 +126,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post("/api/basket")
+            mvc.perform(post(ADD_BASKET_URL)
                             .content(objectMapper.writeValueAsString(basketAddRequest))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isConflict())
@@ -134,6 +138,8 @@ class BasketControllerTest extends ControllerTest {
     @Nested
     @DisplayName("사용자의 장바구니 목록 조회 API 테스트")
     class GetBasketsTests {
+
+        private static final String GET_BASKETS_URL = BASE_URL + "/basket";
 
         @Test
         @DisplayName("사용자의 장바구니 목록 조회 성공")
@@ -162,7 +168,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/api/basket"))
+            mvc.perform(get(GET_BASKETS_URL))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
                     .andExpect(jsonPath("$.message", equalTo(GET_BASKETS_SUCCESS.getMessage())))
@@ -174,6 +180,8 @@ class BasketControllerTest extends ControllerTest {
     @DisplayName("사용자의 장바구니 삭제 API 테스트")
     class RemoveBasketsTest {
 
+        private static final String REMOVE_BASKET_URL = BASE_URL + "/basket";
+
         private static final List<Integer> basketIds = List.of(1, 2, 3, 4);
 
         @Test
@@ -184,7 +192,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(delete("/api/basket")
+            mvc.perform(delete(REMOVE_BASKET_URL)
                             .content(objectMapper.writeValueAsString(basketIds))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
@@ -200,7 +208,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(delete("/api/basket")
+            mvc.perform(delete(REMOVE_BASKET_URL)
                             .content(objectMapper.writeValueAsString(basketIds))
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
@@ -213,6 +221,8 @@ class BasketControllerTest extends ControllerTest {
     @DisplayName("사용자의 장바구니 수량 수정 API 테스트")
     class UpdateQuantityTests {
 
+        private static final String FIX_BASKET_URL = BASE_URL + "/basket/{basketId}";
+
         @Test
         @DisplayName("사용자의 장바구니 수량 수정 성공")
         void testUpdateQuantity() throws Exception{
@@ -221,7 +231,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(put("/api/basket/{basketId}", 1)
+            mvc.perform(put(FIX_BASKET_URL, 1)
                     .param("quantity", "10"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
@@ -236,7 +246,7 @@ class BasketControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(put("/api/basket/{basketId}", 1)
+            mvc.perform(put(FIX_BASKET_URL, 1)
                             .param("quantity", "10"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
