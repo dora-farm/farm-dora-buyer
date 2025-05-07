@@ -3,17 +3,21 @@ package com.farmdora.farmdorabuyer.orders.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.farmdora.farmdorabuyer.entity.Address;
+import com.farmdora.farmdorabuyer.entity.BankType;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Depot;
 import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.OrderStatus;
+import com.farmdora.farmdorabuyer.entity.PayStatus;
 import com.farmdora.farmdorabuyer.entity.Sale;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
+import com.farmdora.farmdorabuyer.orders.repository.BankTypeRepository;
 import com.farmdora.farmdorabuyer.orders.repository.BasketRepository;
 import com.farmdora.farmdorabuyer.orders.repository.DepotRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderStatusRepository;
+import com.farmdora.farmdorabuyer.orders.repository.PayStatusRepository;
 import com.farmdora.farmdorabuyer.orders.repository.SaleRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
 import java.util.ArrayList;
@@ -22,6 +26,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,6 +63,12 @@ public class PurchaseConcurrencyTest {
     @Autowired
     private OrderStatusRepository orderStatusRepository;
 
+    @Autowired
+    private BankTypeRepository bankTypeRepository;
+
+    @Autowired
+    private PayStatusRepository payStatusRepository;
+
     private Integer userId;
     private Integer optionId;
     private Integer depotId;
@@ -65,7 +76,22 @@ public class PurchaseConcurrencyTest {
 
     @BeforeEach
     void setup() {
-        User user = userRepository.save(User.builder().email("test@test.com").build());
+        PayStatus payStatus = PayStatus.builder()
+                .id(Short.valueOf("1"))
+                .name("결제완료")
+                .build();
+        payStatusRepository.save(payStatus);
+
+        BankType bankType = BankType.builder()
+                .id(Short.valueOf("1"))
+                .name("신한은행")
+                .build();
+        bankTypeRepository.save(bankType);
+        User user = User.builder()
+                .email("test@test.com")
+                .bankType(bankType)
+                .build();
+        userRepository.save(user);
         userId = user.getUserId();
 
         Address address = Address.builder()
@@ -111,6 +137,7 @@ public class PurchaseConcurrencyTest {
     }
 
     @Test
+    @DisplayName("동시 주문 성공 테스트")
     void testPurchase() throws InterruptedException {
         // given
         int threadCount = 10;
