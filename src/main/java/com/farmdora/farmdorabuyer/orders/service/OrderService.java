@@ -62,7 +62,7 @@ public class OrderService {
                 .toList();
 
         //saleId를 키로, 메인 이미지를 값으로 갖는 Map
-        List<SaleFile> mainFiles = saleFileRepository.findBySaleIdInAndIsMainTrue(saleIds);
+        List<SaleFile> mainFiles = saleFileRepository.findBySaleIdInAndIsMainFalse(saleIds);
 
         Map<Integer, SaleFile> saleFileMap = mainFiles.stream()
                 .collect(Collectors.toMap(file -> file.getSale().getId(), file -> file));

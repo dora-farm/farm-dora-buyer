@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface SaleFileRepository extends JpaRepository<SaleFile, Integer> {
 
-    List<SaleFile> findBySaleIdInAndIsMainTrue(List<Integer> saleId);
+    List<SaleFile> findBySaleIdInAndIsMainFalse(List<Integer> saleId);
 
     Optional<SaleFile> findBySaleIdAndIsMainTrue(Integer saleId);
 
