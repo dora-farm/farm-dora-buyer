@@ -46,10 +46,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth)->
                         auth
                                 // TODO
-                                .requestMatchers("/api/basket/**").hasAnyRole("USER", "SELLER")
-                                .requestMatchers("/api/like/**").hasAnyRole("USER", "SELLER")
-                                .requestMatchers("/api/my/user/**").hasRole("USER")
-                                .requestMatchers("/api/order/**").hasRole("USER")
+                                .requestMatchers("/api/buyer/basket/**").hasAnyRole("USER", "SELLER")
+                                .requestMatchers("/api/buyer/like/**").hasAnyRole("USER", "SELLER")
+                                .requestMatchers("/api/buyer/my/user/**").hasRole("USER")
+                                .requestMatchers("/api/buyer/order/**").hasRole("USER")
                                 .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, redisTemplate), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session)-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
