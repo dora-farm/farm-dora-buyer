@@ -40,7 +40,7 @@ public interface BasketRepository extends JpaRepository<Basket, Integer> {
         FROM Basket b
         JOIN b.option o
         JOIN o.sale s
-        LEFT JOIN SaleFile sf ON sf.sale = s AND sf.isMain = true
+        LEFT JOIN SaleFile sf ON sf.sale = s AND sf.isMain = false
         WHERE b.user = :user
     """)
     Page<BasketResponseDto> findAllWithMainImageByUser(@Param("user") User user, Pageable pageable);
