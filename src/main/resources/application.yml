@@ -34,10 +34,10 @@ ncp:
       path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
       type: ?type=h&h=192&ttype=png
     banner:
-      path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/popup/
+      path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/
       type: ?type=m&w=1320&h=300&quality=90&bgcolor=FFFFFF&ttype=jpg&anilimit=1
     event:
-      path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/popup/
+      path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/
       type: ?type=m&w=750&h=2000&quality=90&bgcolor=FFFFFF&ttype=jpg&anilimit=1
 
   image-optimizer:
