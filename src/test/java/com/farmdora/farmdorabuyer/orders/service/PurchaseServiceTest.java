@@ -12,12 +12,15 @@ import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.entity.Address;
+import com.farmdora.farmdorabuyer.entity.BankType;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Depot;
 import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.Order;
 import com.farmdora.farmdorabuyer.entity.OrderOption;
 import com.farmdora.farmdorabuyer.entity.OrderStatus;
+import com.farmdora.farmdorabuyer.entity.Pay;
+import com.farmdora.farmdorabuyer.entity.PayStatus;
 import com.farmdora.farmdorabuyer.entity.Sale;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
@@ -30,6 +33,8 @@ import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderOptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderStatusRepository;
+import com.farmdora.farmdorabuyer.orders.repository.PayRepository;
+import com.farmdora.farmdorabuyer.orders.repository.PayStatusRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -67,6 +72,12 @@ class PurchaseServiceTest {
     private OptionRepository optionRepository;
 
     @Mock
+    private PayRepository payRepository;
+
+    @Mock
+    private PayStatusRepository payStatusRepository;
+
+    @Mock
     private EntityManager em;
 
     @InjectMocks
@@ -87,8 +98,11 @@ class PurchaseServiceTest {
             // given
             User mockUser = User.builder()
                     .userId(1)
+                    .bankType(BankType.builder()
+                            .name("신한은행")
+                            .build())
                     .build();
-            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+            when(userRepository.findByUserIdWithBankType(anyInt())).thenReturn(Optional.of(mockUser));
 
             Depot depot = Depot.builder()
                     .id(1)
@@ -135,12 +149,19 @@ class PurchaseServiceTest {
             when(optionRepository.findByIdForUpdate(1)).thenReturn(Optional.of(mockOption1));
             when(optionRepository.findByIdForUpdate(2)).thenReturn(Optional.of(mockOption2));
 
+            PayStatus mockPayStatus = PayStatus.builder()
+                    .id(Short.valueOf("1"))
+                    .name("결제완료")
+                    .build();
+            when(payStatusRepository.findByName("결제완료")).thenReturn(Optional.of(mockPayStatus));
+
             // when
             purchaseService.orderFromBaskets(1, orderRequest);
 
             // then
             verify(orderRepository, times(2)).save(any(Order.class));
             verify(orderOptionRepository, times(2)).save(any(OrderOption.class));
+            verify(payRepository, times(2)).save(any(Pay.class));
             assertThat(baskets.get(0).getOption().getQuantity()).isEqualTo(7);
             assertThat(baskets.get(1).getOption().getQuantity()).isEqualTo(5);
         }
@@ -149,7 +170,7 @@ class PurchaseServiceTest {
         @DisplayName("주문시 사용자가 존재하지 않을 경우 예외발생 테스트")
         void testOrder_UserNotFoundException() {
             // given
-            when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
+            when(userRepository.findByUserIdWithBankType(anyInt())).thenReturn(Optional.empty());
 
             // when
             // then
@@ -164,7 +185,7 @@ class PurchaseServiceTest {
             User mockUser = User.builder()
                     .userId(1)
                     .build();
-            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+            when(userRepository.findByUserIdWithBankType(anyInt())).thenReturn(Optional.of(mockUser));
             when(depotRepository.findById(anyInt())).thenReturn(Optional.empty());
 
             // when
@@ -180,7 +201,7 @@ class PurchaseServiceTest {
             User mockUser = User.builder()
                     .userId(1)
                     .build();
-            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+            when(userRepository.findByUserIdWithBankType(anyInt())).thenReturn(Optional.of(mockUser));
 
             Depot depot = Depot.builder()
                     .id(1)
@@ -202,7 +223,7 @@ class PurchaseServiceTest {
             User mockUser = User.builder()
                     .userId(1)
                     .build();
-            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+            when(userRepository.findByUserIdWithBankType(anyInt())).thenReturn(Optional.of(mockUser));
 
             Depot depot = Depot.builder()
                     .id(1)
@@ -252,7 +273,7 @@ class PurchaseServiceTest {
             User mockUser = User.builder()
                     .userId(1)
                     .build();
-            when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
+            when(userRepository.findByUserIdWithBankType(anyInt())).thenReturn(Optional.of(mockUser));
 
             Depot depot = Depot.builder()
                     .id(1)
