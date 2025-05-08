@@ -55,7 +55,7 @@ public class PayService {
 
         // 상품별 대표 이미지 조회
         Map<Integer, SaleFile> saleFileMap = new HashMap<>();
-        List<SaleFile> mainFiles = saleFileRepository.findBySaleIdInAndIsMainTrue(saleIds);
+        List<SaleFile> mainFiles = saleFileRepository.findBySaleIdInAndIsMainFalse(saleIds);
         for (SaleFile file : mainFiles) {
             saleFileMap.put(file.getSale().getId(), file);
         }
