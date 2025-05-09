@@ -62,7 +62,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://www.farm-dora.kro.kr",
-                "http://farm-dora.kro.kr"
+                "https://www.farm-dora.kro.kr"
                 ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
