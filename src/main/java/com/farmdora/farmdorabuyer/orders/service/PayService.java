@@ -1,6 +1,7 @@
 package com.farmdora.farmdorabuyer.orders.service;
 
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
+import com.farmdora.farmdorabuyer.common.util.NcpImageProperties;
 import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.dto.OrderPayDetailDTO;
 import com.farmdora.farmdorabuyer.orders.dto.SaleInfoDTO;
@@ -22,6 +23,7 @@ public class PayService {
     private final OrderRepository orderRepository;
     private final OrderOptionRepository orderOptionRepository;
     private final PayRepository payRepository;
+    private final NcpImageProperties imageProperties;
 
     @Transactional(readOnly = true)
     public OrderPayDetailDTO getOrderPayDetail(Integer orderId) {
@@ -101,7 +103,7 @@ public class PayService {
             salesInfo.add(SaleInfoDTO.builder()
                     .saleId(sale.getId())
                     .title(sale.getTitle())
-                    .saveFile(mainFile != null ? mainFile.getSaveFile() : null)
+                    .saveFile(mainFile != null ? imageProperties.getProduct().createImageUrl(mainFile.getSaveFile()) : null)
                     .options(optionInfos)
                     .seller(sellerInfo)  // 각 상품에 해당 판매자 정보 추가
                     .build());
