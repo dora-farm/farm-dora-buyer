@@ -158,5 +158,7 @@ public class PurchaseService {
 
         OrderOption orderOption = OrderOption.createOrderOption(option, order, orderRequest.getQuantity(), option.getPrice());
         orderOptionRepository.save(orderOption);
+
+        savePay(user, order, orderOption.getQuantity() * orderOption.getPrice());
     }
 }
