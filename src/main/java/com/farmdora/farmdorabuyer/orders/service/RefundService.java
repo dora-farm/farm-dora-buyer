@@ -26,8 +26,6 @@ public class RefundService {
     private final RefundTypeRepository refundTypeRepository;
     private final OrderRepository orderRepository;
     private final OrderOptionRepository orderOptionRepository;
-    private final PayRepository payRepository;
-    private final PayStatusRepository payStatusRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final SaleFileRepository saleFileRepository;
     private final NCPObjectStorageService ncpImageService;
@@ -36,7 +34,7 @@ public class RefundService {
     public RefundResponse createRefund(
             Integer userId,
             RefundRequest request,
-            List<MultipartFile> files) throws IOException {
+            List<MultipartFile> files) {
         // 주문조회
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("order", request.getOrderId()));
@@ -90,7 +88,7 @@ public class RefundService {
 
         Sale sale = orderOptions.get(0).getOption().getSale();
 
-        Optional<SaleFile> mainImage = saleFileRepository.findBySaleIdAndIsMainTrue(sale.getId());
+        Optional<SaleFile> mainImage = saleFileRepository.findBySaleIdAndIsMainFalse(sale.getId());
 
         return RefundResponse.fromEntity(
                 savedRefund,
