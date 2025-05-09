@@ -27,9 +27,6 @@ ncp:
     bucket: bitcamp-68
 
   image:
-    path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
-    type: ?type=h&h=192&ttype=png
-
     product:
       path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
       type: ?type=h&h=192&ttype=png
@@ -39,13 +36,16 @@ ncp:
     event:
       path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/
       type: ?type=m&w=750&h=2000&quality=90&bgcolor=FFFFFF&ttype=jpg&anilimit=1
+    review:
+      path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/
+      type: ENC(alzL6HsotGrLyKnB9lckv9IqIIAxF5TEja2+KzRNDNp1Vua4fGenWaDjzZK8yzML)
 
   image-optimizer:
     project-id: O8XfcLSSm6
     cdn-domain: zcbg41sa9729.edge.naverncp.com
 
-  access-key: ENC(oBvxn6C62QrqLs0N+lCb/UgxymXI4OALon5g0YLglZPwPFQnm6C8tw==)
-  secret-key: ENC(DF529oTSIv/sQj/hDvwfK/wWVcpf2Yrq77NrKNeZws72YdMkTsI0ziMOZr4cCFgda/jcqcaPkDM=)
+  access-key: ENC(Qt6csgd6ac5Yu+d9oLMMjBL19hWZzMIJk722uWb+NAVwki8xPWPJ5Q==)
+  secret-key: ENC(NJyd1B45LLe/rZ29jbO4SfS434rjGNGH2LbZIjIePLpZiFMwu7ixGlOOEZthqSczvzw0Cb85k0M=)
 
 management:
   endpoints:

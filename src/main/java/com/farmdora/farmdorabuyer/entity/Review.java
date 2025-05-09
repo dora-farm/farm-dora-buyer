@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 @Getter
-@Setter
 @Builder
 @ToString
 @NoArgsConstructor
@@ -37,4 +36,9 @@ public class Review extends BaseTimeEntity {
 
     @Column(nullable = false)
     private byte score;
+
+    public void updateReview(byte score, String content) {
+        this.score = score;
+        this.content = content;
+    }
 }

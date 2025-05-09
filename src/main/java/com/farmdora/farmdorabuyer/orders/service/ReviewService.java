@@ -1,12 +1,15 @@
 package com.farmdora.farmdorabuyer.orders.service;
 
+import com.farmdora.farmdorabuyer.common.exception.AccessDeniedException;
 import com.farmdora.farmdorabuyer.common.exception.FileException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
+import com.farmdora.farmdorabuyer.common.util.NcpImageProperties;
 import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.dto.ReviewDTO.*;
 import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.repository.*;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,15 +36,23 @@ public class ReviewService {
     private final NCPObjectStorageService ncpImageService;
     private final OrderOptionRepository orderOptionRepository;
     private final SaleFileRepository saleFileRepository;
+    private final UserRepository userRepository;
+    private final NcpImageProperties ncpImageProperties;
 
     @Transactional
-    public void createReview(Integer userId, ReviewRequest request, List<MultipartFile> files) throws IOException {
+    public void createReview(Integer userId, ReviewRequest request, List<MultipartFile> files) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("user", userId));
 
         Sale sale = saleRepository.findById(request.getSaleId())
                 .orElseThrow(() -> new ResourceNotFoundException("sale", request.getSaleId()));
 
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("order", request.getOrderId()));
+
+        if (!order.getUser().equals(user)) {
+            throw new AccessDeniedException();
+        }
 
         // 리뷰 생성 및 저장
         Review review = Review.builder()
@@ -51,8 +61,7 @@ public class ReviewService {
                 .score(request.getScore())
                 .content(request.getContent())
                 .build();
-
-        Review savedReview = reviewRepository.save(review);
+        reviewRepository.save(review);
 
         for(MultipartFile file: files) {
             try {
@@ -61,7 +70,7 @@ public class ReviewService {
 
                 // 리뷰 파일 정보 저장
                 ReviewFile reviewFile = ReviewFile.builder()
-                        .review(savedReview)
+                        .review(review)
                         .originFile(originalFilename)
                         .saveFile(savedFilename)
                         .build();
@@ -102,9 +111,17 @@ public class ReviewService {
                             .toList();
 
                     // 해당 상품의 이미지 목록 조회
-                    List<SaleFile> saleFiles = saleFileRepository.findBySaleId(review.getSale().getId());
+                    Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainFalse(review.getSale().getId());
+                    String productImageUrl = null;
+                    if (saleFile.isPresent()) {
+                        productImageUrl = ncpImageProperties.getProduct().createImageUrl(saleFile.get().getSaveFile());
+                    }
 
-                    return ReviewResponse.fromEntity(review, reviewFiles, filteredOrderOptions, ncpImageService, saleFiles);
+                    List<String> reviewImageUrls = reviewFiles.stream()
+                            .map(r -> ncpImageProperties.getReview().createImageUrl(r.getSaveFile()))
+                            .toList();
+
+                    return ReviewResponse.fromEntity(review, reviewImageUrls, filteredOrderOptions, productImageUrl);
                 })
                 .collect(Collectors.toList());
 
@@ -118,17 +135,9 @@ public class ReviewService {
             String content,
             List<String> removedImageUrls,
             MultipartFile[] newImages) throws IOException {
-
-        // todo
-        // jwt로 userId가져와야함
-        Integer userId = 1;
-
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
-
-        review.setScore(score);
-        review.setContent(content);
-        reviewRepository.save(review);
+        review.updateReview(score, content);
 
         if(removedImageUrls != null && !removedImageUrls.isEmpty()) {
             for(String imageUrl : removedImageUrls) {
@@ -148,7 +157,7 @@ public class ReviewService {
             }
         }
 
-        List<ReviewFile> NewUpdatedReviewFiles = new ArrayList<>(reviewFileRepository.findAllByReviewId(reviewId));
+        List<ReviewFile> newUpdatedReviewFiles = new ArrayList<>(reviewFileRepository.findAllByReviewId(reviewId));
         if (newImages != null) {
             for (MultipartFile image : newImages) {
                 String UpdateFileName = ncpImageService.uploadImage(image, "review");
@@ -160,7 +169,7 @@ public class ReviewService {
                         .build();
 
                 reviewFileRepository.save(reviewFile);
-                NewUpdatedReviewFiles.add(reviewFile);
+                newUpdatedReviewFiles.add(reviewFile);
             }
         }
 
@@ -173,10 +182,17 @@ public class ReviewService {
                 .collect(Collectors.toList());
 
         // 해당 상품의 이미지 목록 조회 (업데이트 시에도 이미지 정보 추가)
-        List<SaleFile> saleFiles = saleFileRepository.findBySaleId(review.getSale().getId());
+        Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainFalse(review.getSale().getId());
+        String saleImageUrl = null;
+        if (saleFile.isPresent()) {
+            saleImageUrl = saleFile.get().getSaveFile();
+        }
 
         // 응답 DTO 생성 및 반환
-        return ReviewResponse.fromEntity(review, NewUpdatedReviewFiles, filteredOrderOptions, ncpImageService, saleFiles);
+        List<String> updatedReviewFileUrls = newUpdatedReviewFiles.stream()
+                .map(r -> ncpImageProperties.getReview().createImageUrl(r.getSaveFile()))
+                .toList();
+        return ReviewResponse.fromEntity(review, updatedReviewFileUrls, filteredOrderOptions, saleImageUrl);
     }
 
     private String extractFilenameDeleteUrl(String imageUrl) {
@@ -197,8 +213,6 @@ public class ReviewService {
 
     @Transactional
     public void deleteReview(Integer reviewId) {
-        Integer userId = 1;
-
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("review", reviewId));
 

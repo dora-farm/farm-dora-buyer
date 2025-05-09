@@ -8,6 +8,7 @@ import com.farmdora.farmdorabuyer.common.exception.AccessDeniedException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
+import com.farmdora.farmdorabuyer.common.util.NcpImageProperties;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.User;
@@ -17,7 +18,6 @@ import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,14 +31,9 @@ public class BasketService {
     private final BasketRepository basketRepository;
     private final UserRepository userRepository;
     private final OptionRepository optionRepository;
+    private final NcpImageProperties imageProperties;
 
     private static final int BASKET_LIMIT = 16;
-
-    @Value("${ncp.image.path}")
-    private String imagePath;
-
-    @Value("${ncp.image.type}")
-    private String imageType;
 
     public void addBasket(Integer userId, BasketRequestDto basketAddRequest) {
         User user = userRepository.findById(userId)
@@ -87,7 +82,7 @@ public class BasketService {
         Page<BasketResponseDto> baskets = basketRepository.findAllWithMainImageByUser(user, pageable);
         for (BasketResponseDto basket : baskets.getContent()) {
             if (basket.getImageUrl() != null) {
-                basket.setImageUrl(imagePath + basket.getImageUrl() + imageType);
+                basket.setImageUrl(imageProperties.getProduct().createImageUrl(basket.getImageUrl()));
             }
         }
 

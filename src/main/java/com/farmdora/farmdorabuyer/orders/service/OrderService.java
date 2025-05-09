@@ -2,6 +2,7 @@ package com.farmdora.farmdorabuyer.orders.service;
 
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
+import com.farmdora.farmdorabuyer.common.util.NcpImageProperties;
 import com.farmdora.farmdorabuyer.entity.*;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderResponseDTO.*;
@@ -9,7 +10,6 @@ import com.farmdora.farmdorabuyer.orders.dto.SearchDTO;
 import com.farmdora.farmdorabuyer.orders.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,12 +30,7 @@ public class OrderService {
     private final SaleFileRepository saleFileRepository;
     private final ReviewRepository reviewRepository;
     private final OrderStatusRepository orderStatusRepository;
-
-    @Value("${ncp.image.path}")
-    private String path;
-
-    @Value("${ncp.image.type}")
-    private String type;
+    private final NcpImageProperties imageProperties;
 
     @Transactional(readOnly = true)
     public PageResponseDTO<OrderResponseDTO> getOrderList(Integer userId, SearchDTO SearchDTO, Pageable pageable) {
@@ -122,13 +117,13 @@ public class OrderService {
                         .saleId(saleId)
                         .title(sale.getTitle())
                         .statusId(order.getStatus().getId())
-                        .reviewCompleted(hasReview) // 수정된 부분
+                        .reviewCompleted(hasReview)
                         .options(optionInfos)
                         .build();
 
                 // 이미지 정보 설정
                 SaleFile saleFile = saleFileMap.get(saleId);
-                saleInfo.setSaveFile(path + saleFile.getSaveFile() + type);
+                saleInfo.setSaveFile(imageProperties.getProduct().createImageUrl(saleFile.getSaveFile()));
                 salesList.add(saleInfo);
             }
             responseDTO.setSales(salesList);

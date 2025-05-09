@@ -45,7 +45,6 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth)->
                         auth
-                                // TODO
                                 .requestMatchers("/api/buyer/basket/**").hasAnyRole("USER", "SELLER")
                                 .requestMatchers("/api/buyer/like/**").hasAnyRole("USER", "SELLER")
                                 .requestMatchers("/api/buyer/my/user/**").hasRole("USER")
