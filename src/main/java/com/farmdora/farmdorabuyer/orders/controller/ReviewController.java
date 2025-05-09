@@ -29,10 +29,12 @@ public class ReviewController {
     
     @PostMapping("/order/review")
     public ResponseEntity<?> createReview(
+            Principal principal,
             ReviewRequest request,
             @RequestParam(value = "images", required = false) MultipartFile[] images) throws IOException {
+        Integer userId = Integer.parseInt(principal.getName());
         List<MultipartFile> imagesList = images != null ? Arrays.asList(images) : new ArrayList<>();
-        reviewService.createReview(1, request, imagesList);
+        reviewService.createReview(userId, request, imagesList);
         return ResponseEntity
                 .ok()
                 .body(new HttpResponse(HttpStatus.OK, REGISTER_REVIEW_SUCCESS.getMessage(), null));

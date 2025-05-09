@@ -1,19 +1,24 @@
 package com.farmdora.farmdorabuyer.orders.dto;
 
-import com.farmdora.farmdorabuyer.entity.*;
-import com.farmdora.farmdorabuyer.orders.service.NCPObjectStorageService;
-import lombok.*;
-
+import com.farmdora.farmdorabuyer.entity.Option;
+import com.farmdora.farmdorabuyer.entity.OrderOption;
+import com.farmdora.farmdorabuyer.entity.Review;
+import com.farmdora.farmdorabuyer.entity.Sale;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 public class ReviewDTO {
 
     @Getter
     @Setter
     @Builder
+    @ToString
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ReviewRequest {
@@ -67,26 +72,12 @@ public class ReviewDTO {
         private List<OrderOptionInfo> orderOptions;
 
         // Review 엔티티를 ReviewResponse DTO로 변환하는 정적 메서드
-        public static ReviewResponse fromEntity(Review review, List<ReviewFile> reviewFiles,
-                                                List<OrderOptionInfo> orderOptions, NCPObjectStorageService ncpImageService,
-                                                List<SaleFile> saleFiles) {
-            Sale sale = review.getSale();
-
-            String productImageUrl = "";
-
-            // 해당 sale_id에 맞는 SaleFile 중 isMain=true인 파일 찾기
-            Optional<SaleFile> mainSaleFile = saleFiles.stream()
-                    .filter(file -> file.isMain())
-                    .findFirst();
-
-            if (mainSaleFile.isPresent()) {
-                productImageUrl = ncpImageService.getReviewImageUrl(mainSaleFile.get().getSaveFile());
-            }
-
+        public static ReviewResponse fromEntity(Review review,
+                                                List<String> reviewImageUrls,
+                                                List<OrderOptionInfo> orderOptions,
+                                                String productImageUrl) {
             // 리뷰 이미지 URL 변환
-            List<String> imageUrls = reviewFiles.stream()
-                    .map(file -> ncpImageService.getReviewImageUrl(file.getSaveFile()))
-                    .collect(Collectors.toList());
+            Sale sale = review.getSale();
 
             return ReviewResponse.builder()
                     .reviewId(review.getId())
@@ -96,7 +87,7 @@ public class ReviewDTO {
                     .content(review.getContent())
                     .score(review.getScore())
                     .createdDate(review.getCreatedDate())
-                    .imageUrls(imageUrls)
+                    .imageUrls(reviewImageUrls)
                     .orderOptions(orderOptions)
                     .build();
         }
