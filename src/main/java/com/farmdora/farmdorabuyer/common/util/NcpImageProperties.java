@@ -13,6 +13,7 @@ public class NcpImageProperties {
     private ImageInfo product;
     private ImageInfo banner;
     private ImageInfo event;
+    private ImageInfo review;
 
     @Getter
     @Setter
