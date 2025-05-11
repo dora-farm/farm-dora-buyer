@@ -22,6 +22,7 @@ import com.farmdora.farmdorabuyer.entity.OrderStatus;
 import com.farmdora.farmdorabuyer.entity.Pay;
 import com.farmdora.farmdorabuyer.entity.PayStatus;
 import com.farmdora.farmdorabuyer.entity.Sale;
+import com.farmdora.farmdorabuyer.entity.Seller;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromOptionDTO;
@@ -111,14 +112,18 @@ class PurchaseServiceTest {
                     .build();
             when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
 
-            Sale mockSale1 = new Sale();
+            Sale mockSale1 = Sale.builder()
+                    .seller(new Seller())
+                    .build();
             Option mockOption1 = Option.builder()
                     .id(1)
                     .quantity(10)
                     .sale(mockSale1)
                     .price(10000)
                     .build();
-            Sale mockSale2 = new Sale();
+            Sale mockSale2 = Sale.builder()
+                    .seller(new Seller())
+                    .build();
             Option mockOption2 = Option.builder()
                     .id(2)
                     .quantity(10)
@@ -232,8 +237,12 @@ class PurchaseServiceTest {
                     .build();
             when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
 
-            Sale mockSale1 = new Sale();
-            Sale mockSale2 = new Sale();
+            Sale mockSale1 = Sale.builder()
+                    .seller(new Seller())
+                    .build();
+            Sale mockSale2 = Sale.builder()
+                    .seller(new Seller())
+                    .build();
             List<Basket> baskets = List.of(
                     Basket.builder()
                             .id(1)
@@ -282,14 +291,18 @@ class PurchaseServiceTest {
                     .build();
             when(depotRepository.findById(anyInt())).thenReturn(Optional.of(depot));
 
-            Sale mockSale1 = new Sale();
+            Sale mockSale1 = Sale.builder()
+                    .seller(new Seller())
+                    .build();
             Option mockOption1 = Option.builder()
                     .id(1)
                     .quantity(1)
                     .sale(mockSale1)
                     .price(10000)
                     .build();
-            Sale mockSale2 = new Sale();
+            Sale mockSale2 = Sale.builder()
+                    .seller(new Seller())
+                    .build();
             Option mockOption2 = Option.builder()
                     .id(2)
                     .quantity(10)
@@ -342,6 +355,10 @@ class PurchaseServiceTest {
             // given
             User mockUser = User.builder()
                     .userId(1)
+                    .bankType(BankType.builder()
+                            .id(Short.valueOf("1"))
+                            .name("신한은행")
+                            .build())
                     .build();
             when(userRepository.findById(anyInt())).thenReturn(Optional.of(mockUser));
 
@@ -357,12 +374,25 @@ class PurchaseServiceTest {
                     .build();
             when(orderStatusRepository.findByName(anyString())).thenReturn(Optional.of(mockOrderStatus));
 
+            Seller mockSeller = Seller.builder()
+                    .user(mockUser)
+                    .build();
+            Sale mockSale = Sale.builder()
+                    .seller(mockSeller)
+                    .build();
             Option mockOption = Option.builder()
                     .id(1)
+                    .sale(mockSale)
                     .price(10000)
                     .quantity(10)
                     .build();
             when(optionRepository.findByIdForUpdate(anyInt())).thenReturn(Optional.of(mockOption));
+
+            PayStatus mockPayStatus = PayStatus.builder()
+                    .id(Short.valueOf("1"))
+                    .name("결제완료")
+                    .build();
+            when(payStatusRepository.findByName("결제완료")).thenReturn(Optional.of(mockPayStatus));
 
             // when
             purchaseService.orderFromOption(1, orderRequest);

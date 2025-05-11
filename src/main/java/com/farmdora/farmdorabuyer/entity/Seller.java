@@ -32,24 +32,21 @@ public class Seller {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false, name = "company_num", unique = true)
+    @Column(name = "company_num", unique = true)
     private String companyNum;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String name;
 
     @Embedded
     private Address address;
 
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private String phoneNum;
 
-    @Column(nullable = false)
     private String saveFile;
 
-    @Column(nullable = false)
     private String originFile;
 
-    @Column(nullable = false)
     private boolean isApprove;
 }

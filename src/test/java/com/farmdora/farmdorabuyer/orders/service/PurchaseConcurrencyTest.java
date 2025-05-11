@@ -10,6 +10,7 @@ import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.OrderStatus;
 import com.farmdora.farmdorabuyer.entity.PayStatus;
 import com.farmdora.farmdorabuyer.entity.Sale;
+import com.farmdora.farmdorabuyer.entity.Seller;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
 import com.farmdora.farmdorabuyer.orders.repository.BankTypeRepository;
@@ -19,6 +20,7 @@ import com.farmdora.farmdorabuyer.orders.repository.OptionRepository;
 import com.farmdora.farmdorabuyer.orders.repository.OrderStatusRepository;
 import com.farmdora.farmdorabuyer.orders.repository.PayStatusRepository;
 import com.farmdora.farmdorabuyer.orders.repository.SaleRepository;
+import com.farmdora.farmdorabuyer.orders.repository.SellerRepository;
 import com.farmdora.farmdorabuyer.orders.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +71,9 @@ public class PurchaseConcurrencyTest {
     @Autowired
     private PayStatusRepository payStatusRepository;
 
+    @Autowired
+    private SellerRepository sellerRepository;
+
     private Integer userId;
     private Integer optionId;
     private Integer depotId;
@@ -94,6 +99,11 @@ public class PurchaseConcurrencyTest {
         userRepository.save(user);
         userId = user.getUserId();
 
+        Seller seller = Seller.builder()
+                .user(user)
+                .build();
+        sellerRepository.save(seller);
+
         Address address = Address.builder()
                 .addr("서울시")
                 .detailAddr("강남구")
@@ -107,7 +117,9 @@ public class PurchaseConcurrencyTest {
                 .build());
         depotId = depot.getId();
 
-        Sale sale = new Sale();
+        Sale sale = Sale.builder()
+                .seller(seller)
+                .build();
         saleRepository.save(sale);
 
         Option option = Option.builder()

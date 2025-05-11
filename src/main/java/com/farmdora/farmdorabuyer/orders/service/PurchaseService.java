@@ -9,7 +9,7 @@ import com.farmdora.farmdorabuyer.entity.OrderOption;
 import com.farmdora.farmdorabuyer.entity.OrderStatus;
 import com.farmdora.farmdorabuyer.entity.Pay;
 import com.farmdora.farmdorabuyer.entity.PayStatus;
-import com.farmdora.farmdorabuyer.entity.Sale;
+import com.farmdora.farmdorabuyer.entity.Seller;
 import com.farmdora.farmdorabuyer.entity.User;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromBasketDTO;
 import com.farmdora.farmdorabuyer.orders.dto.OrderRequestDTO.OrderFromOptionDTO;
@@ -60,7 +60,7 @@ public class PurchaseService {
         checkDepotOfUser(depot, user);
 
         List<Basket> baskets = basketRepository.findAllByIdIn(orderRequest.getBasketIds());
-        Map<Sale, List<Basket>> groupedBaskets = groupBaskets(baskets);
+        Map<Seller, List<Basket>> groupedBaskets = groupBaskets(baskets);
 
         OrderStatus status = orderStatusRepository.findByName("배송준비")
                 .orElseThrow(() -> new ResourceNotFoundException("OrderStatus", "배송준비"));
@@ -74,14 +74,14 @@ public class PurchaseService {
         }
     }
 
-    private Map<Sale, List<Basket>> groupBaskets(List<Basket> baskets) {
+    private Map<Seller, List<Basket>> groupBaskets(List<Basket> baskets) {
         return baskets
                 .stream()
-                .collect(Collectors.groupingBy(b -> b.getOption().getSale()));
+                .collect(Collectors.groupingBy(b -> b.getOption().getSale().getSeller()));
     }
 
-    private void saveOrders(User user, Depot depot, Map<Sale, List<Basket>> groupedBaskets, OrderStatus status) {
-        for (Map.Entry<Sale, List<Basket>> entry : groupedBaskets.entrySet()) {
+    private void saveOrders(User user, Depot depot, Map<Seller, List<Basket>> groupedBaskets, OrderStatus status) {
+        for (Map.Entry<Seller, List<Basket>> entry : groupedBaskets.entrySet()) {
             Order order = Order.createOrder(user, status, depot.getAddress());
             orderRepository.save(order);
 

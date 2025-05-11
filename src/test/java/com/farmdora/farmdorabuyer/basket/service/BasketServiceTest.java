@@ -15,6 +15,8 @@ import com.farmdora.farmdorabuyer.basket.exception.BasketOverLimitException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceAlreadyExistsException;
 import com.farmdora.farmdorabuyer.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdorabuyer.common.response.PageResponseDTO;
+import com.farmdora.farmdorabuyer.common.util.NcpImageProperties;
+import com.farmdora.farmdorabuyer.common.util.NcpImageProperties.ImageInfo;
 import com.farmdora.farmdorabuyer.entity.Basket;
 import com.farmdora.farmdorabuyer.entity.Option;
 import com.farmdora.farmdorabuyer.entity.User;
@@ -46,6 +48,9 @@ class BasketServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private NcpImageProperties ncpImageProperties;
 
     @InjectMocks
     private BasketService basketService;
@@ -222,6 +227,11 @@ class BasketServiceTest {
             Pageable pageable = PageRequest.of(0, 5);
             Page<BasketResponseDto> basketPage = new PageImpl<>(baskets, pageable, 2);
             when(basketRepository.findAllWithMainImageByUser(any(User.class), any(Pageable.class))).thenReturn(basketPage);
+
+            ImageInfo imageInfo = new ImageInfo();
+            imageInfo.setPath("path");
+            imageInfo.setType("type");
+            when(ncpImageProperties.getProduct()).thenReturn(imageInfo);
 
             // when
             PageResponseDTO<BasketResponseDto> result = basketService.getBaskets(1, PageRequest.of(0, 10));
